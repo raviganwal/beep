@@ -1,5 +1,5 @@
-import 'package:beep/ui/dashboard/profile/notification_tab_view.dart';
-import 'package:beep/ui/dashboard/profile/school_tab_view.dart';
+import 'package:beep/ui/dashboard/notification_tab_view.dart';
+import 'package:beep/ui/dashboard/school_tab_view.dart';
 import 'package:beep/ui/dashboard/profile_tab_view.dart';
 import 'package:beep/ui/dashboard/referral_tab_view.dart';
 import 'package:flutter/material.dart';

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefService {
-  static const String isLoggedIn = "com.beep.isLoggedIn";
   static const String token = "com.beep.token";
   static const String verificationToken = "com.beep.verification_token";
   static const String resendToken = "com.beep.resend_token";

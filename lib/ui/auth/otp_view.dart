@@ -2,6 +2,7 @@ import 'package:beep/core/viewmodel/auth_view_model.dart';
 import 'package:beep/ui/auth/referral_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,9 @@ import '../widget/button/app_button.dart';
 import '../widget/rich_text/tc_rich_text.dart';
 
 class OtpView extends StatefulWidget {
-  const OtpView({Key? key}) : super(key: key);
+  final String phoneNumber;
+
+  const OtpView({Key? key, required this.phoneNumber}) : super(key: key);
 
   @override
   State<OtpView> createState() => _OtpViewState();
@@ -68,7 +71,7 @@ class _OtpViewState extends State<OtpView> {
                     SizedBox(
                       width: 380,
                       child: Text(
-                        "We have sent a verification code on your phone number +012345443243 Please enter the four number of verification code below",
+                        "We have sent a verification code on your phone number ${widget.phoneNumber} Please enter the four number of verification code below",
                         textAlign: TextAlign.center,
                         style: GoogleFonts.nunitoSans(
                             color: const Color(0xff898989),
@@ -97,12 +100,12 @@ class _OtpViewState extends State<OtpView> {
                             fontWeight: FontWeight.w700,
                             color: const Color(0xff212121),
                           ),
-                          //runs when a code is typed in
                           onCodeChanged: (String code) {
-                            //handle validation or checks here if necessary
                           },
                           //runs when every textfield is filled
-                          onSubmit: (String verificationCode) {},
+                          onSubmit: (String verificationCode) {
+                            authViewModel.otpCodeInput = verificationCode;
+                          },
                         ),
                       ],
                     ),
@@ -119,7 +122,9 @@ class _OtpViewState extends State<OtpView> {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        authViewModel.resendOtp();
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
@@ -139,7 +144,12 @@ class _OtpViewState extends State<OtpView> {
                     MediaQuery.of(context).orientation == Orientation.landscape
                         ? AppButton(
                             onTap: () {
-                              _next();
+                              if (authViewModel.otpCodeInput.isEmpty &&
+                                  authViewModel.otpCodeInput.length < 3) {
+                                Fluttertoast.showToast(msg: 'Please enter OTP');
+                              } else {
+                                authViewModel.otpVerification();
+                              }
                             },
                             title: "Next",
                           )
@@ -157,7 +167,12 @@ class _OtpViewState extends State<OtpView> {
                       right: 0,
                       child: AppButton(
                         onTap: () {
-                          _next();
+                          if (authViewModel.otpCodeInput.isEmpty &&
+                              authViewModel.otpCodeInput.length < 3) {
+                            Fluttertoast.showToast(msg: 'Please enter OTP');
+                          } else {
+                            authViewModel.otpVerification();
+                          }
                         },
                         title: "Next",
                       ),
@@ -168,9 +183,5 @@ class _OtpViewState extends State<OtpView> {
         ),
       ),
     );
-  }
-
-  _next() async {
-    await locator<NavigationService>().navigateToWidget(const ReferralView());
   }
 }

@@ -1,4 +1,5 @@
 import 'package:beep/ui/auth/login_view.dart';
+import 'package:beep/ui/auth/startup_view.dart';
 import 'package:flutter/material.dart';
 
 import 'core/app_locator.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         theme: appTheme,
         navigatorKey: locator<NavigationService>().navigatorKey,
         debugShowCheckedModeBanner: false,
-        home: const LoginView(),
+        home: const StartupView(),
       ),
     );
   }

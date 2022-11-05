@@ -1,4 +1,5 @@
 import 'package:beep/core/app_validators.dart';
+import 'package:beep/core/service/shared_pref_service.dart';
 import 'package:beep/ui/auth/sign_up_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,6 +30,7 @@ class _LoginViewState extends State<LoginView> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final authViewModel = context.read<AuthViewModel>();
       authViewModel.autoValidateModeLogin = AutovalidateMode.disabled;
+      authViewModel.obscureText1 = true;
     });
   }
 
@@ -36,6 +38,7 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -93,7 +96,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     AppTextField(
                       controller: _passwordController,
-                      obscureText: !authViewModel.obscureText,
+                      obscureText: authViewModel.obscureText1,
                       hintText: 'Password',
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -108,14 +111,14 @@ class _LoginViewState extends State<LoginView> {
                       suffixIcon: IconButton(
                           icon: Icon(
                             // Based on passwordVisible state choose  vbghthe icon
-                            authViewModel.obscureText
+                            authViewModel.obscureText1
                                 ? Icons.visibility
                                 : Icons.visibility_off,
                             color: const Color(0xFF898989),
                           ),
                           onPressed: () {
-                            authViewModel.obscureText =
-                                !authViewModel.obscureText;
+                            authViewModel.obscureText1 =
+                                !authViewModel.obscureText1;
                           }),
                     ),
                     const SizedBox(

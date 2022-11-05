@@ -8,6 +8,8 @@ class ApiService {
 
   ApiService() {
     dio.interceptors.add(InterceptorsWrapper(onRequest: (options, handler) {
+      appDebugPrint("options.path ${options.path}");
+      appDebugPrint("options.baseUrl ${options.baseUrl}");
       return handler.next(options); //continue
     }, onResponse: (response, handler) {
       return handler.next(response); // continue
@@ -41,7 +43,7 @@ class ApiService {
           options: Options(
               // contentType: Headers.formUrlEncodedContentType,
               headers: headers));
-      appDebugPrint('response ${response.data}');
+      appDebugPrint('responsedata ${response.data}');
       return response.data;
     } on DioError catch (e) {
       // The request was made and the server responded with a status code

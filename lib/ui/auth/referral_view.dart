@@ -4,6 +4,7 @@ import 'package:beep/ui/auth/signup_complete.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,18 @@ class ReferralView extends StatefulWidget {
 }
 
 class _ReferralViewState extends State<ReferralView> {
+  final _formKey = GlobalKey<FormState>();
+  final _referralCodeController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final authViewModel = context.read<AuthViewModel>();
+      authViewModel.isReferralApplied = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
@@ -46,6 +59,7 @@ class _ReferralViewState extends State<ReferralView> {
           child: Stack(
             children: [
               Form(
+                key: _formKey,
                 child: ListView(
                   children: [
                     Image.asset(
@@ -92,6 +106,7 @@ class _ReferralViewState extends State<ReferralView> {
                               children: [
                                 Flexible(
                                   child: TextFormField(
+                                    controller: _referralCodeController,
                                     enabled: authViewModel.isReferralApplied
                                         ? false
                                         : true,
@@ -148,10 +163,19 @@ class _ReferralViewState extends State<ReferralView> {
                                 topRight: Radius.circular(12),
                                 bottomRight: Radius.circular(12),
                               ),
-                              onTap: () {
-                                authViewModel.isReferralApplied =
-                                    !authViewModel.isReferralApplied;
-                              },
+                              onTap: authViewModel.isReferralApplied
+                                  ? null
+                                  : () {
+                                      if (_referralCodeController
+                                          .text.isEmpty) {
+                                        Fluttertoast.showToast(
+                                            msg: 'Please select referral code');
+                                      } else {
+                                        authViewModel.applyReferralCode(
+                                            referralCode:
+                                                _referralCodeController.text);
+                                      }
+                                    },
                               child: Container(
                                 width: 121,
                                 height: 57,
@@ -191,7 +215,7 @@ class _ReferralViewState extends State<ReferralView> {
                     MediaQuery.of(context).orientation == Orientation.landscape
                         ? AppButton(
                             onTap: () {
-                              _next();
+                              _next(authViewModel);
                             },
                             title: "Sign Up",
                           )
@@ -209,7 +233,7 @@ class _ReferralViewState extends State<ReferralView> {
                       right: 0,
                       child: AppButton(
                         onTap: () {
-                          _next();
+                          _next(authViewModel);
                         },
                         title: "Sign Up",
                       ),
@@ -222,7 +246,7 @@ class _ReferralViewState extends State<ReferralView> {
     );
   }
 
-  _next() async {
-    await locator<NavigationService>().navigateToWidget(const SignupComplete());
+  _next(AuthViewModel authViewModel) async {
+    authViewModel.submitSignup();
   }
 }

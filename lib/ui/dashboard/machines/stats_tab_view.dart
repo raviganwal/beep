@@ -1,6 +1,9 @@
+import 'package:beep/core/app_status.dart';
+import 'package:beep/core/viewmodel/machine_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../../widget/utility/no_data_widget.dart';
 
@@ -13,7 +16,17 @@ class StatsTabView extends StatefulWidget {
 
 class _StatsTabViewState extends State<StatsTabView> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final machineViewModel = context.read<MachineViewModel>();
+      machineViewModel.getMachineDetail();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final machineViewModel = context.watch<MachineViewModel>();
     return Scaffold(
       backgroundColor: const Color(0xFFF4F4F4),
       body: SingleChildScrollView(
@@ -30,8 +43,8 @@ class _StatsTabViewState extends State<StatsTabView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: 180,
-                        height: 180,
+                        width: 160,
+                        height: 160,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
@@ -41,13 +54,18 @@ class _StatsTabViewState extends State<StatsTabView> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Image.asset(
-                          'assets/png/machine-image.png',
+                          machineViewModel.checkMachineStatus(
+                                      machine:
+                                          machineViewModel.selectedMahcine) ==
+                                  MachineStatus.offline
+                              ? 'assets/png/machine-image-offline.png'
+                              : 'assets/png/machine-image.png',
                           width: 134,
                           height: 165,
                         ),
                       ),
                       const SizedBox(
-                        width: 20,
+                        width: 16,
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +85,13 @@ class _StatsTabViewState extends State<StatsTabView> {
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: const Color(0xffe7faf3),
+                              color: machineViewModel.checkMachineStatus() ==
+                                      MachineStatus.operatesNormally
+                                  ? const Color(0xffe7faf3)
+                                  : machineViewModel.checkMachineStatus() ==
+                                          MachineStatus.needAttention
+                                      ? const Color(0xffffe7e2)
+                                      : const Color(0xFFEAEAEA),
                             ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -76,16 +100,36 @@ class _StatsTabViewState extends State<StatsTabView> {
                             child: Row(
                               children: [
                                 SvgPicture.asset(
-                                  'assets/svg/circle-check.svg',
+                                  machineViewModel.checkMachineStatus() ==
+                                          MachineStatus.operatesNormally
+                                      ? 'assets/svg/circle-check.svg'
+                                      : machineViewModel.checkMachineStatus() ==
+                                              MachineStatus.needAttention
+                                          ? 'assets/svg/info-icon-red.svg'
+                                          : 'assets/svg/offline-icon.svg',
                                   width: 16,
                                   height: 16,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  "Operate Normally",
+                                  machineViewModel.checkMachineStatus() ==
+                                          MachineStatus.operatesNormally
+                                      ? "Operate Normally"
+                                      : machineViewModel.checkMachineStatus() ==
+                                              MachineStatus.needAttention
+                                          ? "Need Attentions"
+                                          : "Offline",
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.nunitoSans(
-                                    color: const Color(0xff00ab6c),
+                                    color:
+                                        machineViewModel.checkMachineStatus() ==
+                                                MachineStatus.operatesNormally
+                                            ? const Color(0xff00ab6c)
+                                            : machineViewModel
+                                                        .checkMachineStatus() ==
+                                                    MachineStatus.needAttention
+                                                ? const Color(0xffde2800)
+                                                : const Color(0xFF898989),
                                     fontSize: 13,
                                     height: 1.69,
                                     fontWeight: FontWeight.w700,
@@ -96,10 +140,19 @@ class _StatsTabViewState extends State<StatsTabView> {
                           ),
                           const SizedBox(height: 25),
                           Container(
-                            width: 180,
+                            width: 150,
                             child: Row(
                               children: [
-                                SvgPicture.asset('assets/svg/foam-icon.svg'),
+                                SvgPicture.asset(
+                                  machineViewModel.checkMachineStatus() ==
+                                          MachineStatus.offline
+                                      ? 'assets/svg/foam-icon-grey.svg'
+                                      : machineViewModel
+                                                  .selectedMahcine.foamTank ==
+                                              AppStatus.foamNormal
+                                          ? 'assets/svg/foam-icon.svg'
+                                          : 'assets/svg/foam-icon-red.svg',
+                                ),
                                 const SizedBox(
                                   width: 5,
                                 ),
@@ -121,20 +174,33 @@ class _StatsTabViewState extends State<StatsTabView> {
                           Stack(
                             children: [
                               Container(
-                                width: 180,
+                                width: 150,
                                 height: 12,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3),
-                                  color: const Color(0xffeaeaea),
+                                  color: machineViewModel
+                                              .selectedMahcine.foamTank ==
+                                          AppStatus.foamNormal
+                                      ? const Color(0xffeaeaea)
+                                      : const Color(0xffde2800)
+                                          .withOpacity(.15),
                                 ),
                               ),
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                width: 166,
+                                width: 130,
                                 height: 12,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3),
-                                  color: const Color(0xff00dd8d),
+                                  color:
+                                      machineViewModel.checkMachineStatus() ==
+                                              MachineStatus.offline
+                                          ? const Color(0xffc4c4c4)
+                                          : machineViewModel.selectedMahcine
+                                                      .foamTank ==
+                                                  AppStatus.foamNormal
+                                              ? const Color(0xff00dd8d)
+                                              : const Color(0xffde2800),
                                 ),
                               )
                             ],
@@ -143,10 +209,18 @@ class _StatsTabViewState extends State<StatsTabView> {
                             height: 6,
                           ),
                           Container(
-                            width: 180,
+                            width: 150,
                             child: Row(
                               children: [
-                                SvgPicture.asset('assets/svg/water-icon.svg'),
+                                SvgPicture.asset(
+                                    machineViewModel.checkMachineStatus() ==
+                                            MachineStatus.offline
+                                        ? 'assets/svg/water-icon-grey.svg'
+                                        : machineViewModel.selectedMahcine
+                                                    .waterTank ==
+                                                AppStatus.waterNormal
+                                            ? 'assets/svg/water-icon.svg'
+                                            : 'assets/svg/water-icon-red.svg'),
                                 const SizedBox(
                                   width: 5,
                                 ),
@@ -168,20 +242,33 @@ class _StatsTabViewState extends State<StatsTabView> {
                           Stack(
                             children: [
                               Container(
-                                width: 180,
+                                width: 150,
                                 height: 12,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3),
-                                  color: const Color(0xffeaeaea),
+                                  color: machineViewModel
+                                              .selectedMahcine.waterTank ==
+                                          AppStatus.waterNormal
+                                      ? const Color(0xffeaeaea)
+                                      : const Color(0xffde2800)
+                                          .withOpacity(.15),
                                 ),
                               ),
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                width: 166,
+                                width: 130,
                                 height: 12,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3),
-                                  color: const Color(0xff00ab6c),
+                                  color:
+                                      machineViewModel.checkMachineStatus() ==
+                                              MachineStatus.offline
+                                          ? const Color(0xffc4c4c4)
+                                          : machineViewModel.selectedMahcine
+                                                      .waterTank ==
+                                                  AppStatus.waterNormal
+                                              ? const Color(0xff00ab6c)
+                                              : const Color(0xffde2800),
                                 ),
                               )
                             ],
@@ -206,7 +293,7 @@ class _StatsTabViewState extends State<StatsTabView> {
                     height: 10,
                   ),
                   Text(
-                    "1234 Address St, Georgia",
+                    machineViewModel.selectedMahcine.address.toString(),
                     style: GoogleFonts.nunitoSans(
                       color: const Color(0xff212121),
                       fontSize: 17,

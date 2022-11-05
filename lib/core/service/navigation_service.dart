@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 /// ```
 class NavigationService {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
 
   void pop() {
@@ -30,9 +31,10 @@ class NavigationService {
     return _navigatorKey.currentState!
         .pushNamed(routeName, arguments: arguments);
   }
+
   Future<dynamic> navigateReplacementToWidget(Widget page) {
-    return _navigatorKey.currentState!
-        .pushReplacement(MaterialPageRoute(builder: (BuildContext context) => page));
+    return _navigatorKey.currentState!.pushReplacement(
+        MaterialPageRoute(builder: (BuildContext context) => page));
   }
 
   Future<dynamic> navigateToWidget(Widget page) {
@@ -61,5 +63,17 @@ class NavigationService {
         );
       },
     ), (Route<dynamic> route) => false);
+  }
+
+  Future<dynamic> navigateToWidgetFade(Widget page) {
+    return _navigatorKey.currentState!.push(PageRouteBuilder(
+      pageBuilder: (BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation) {
+        return FadeTransition(
+          opacity: animation,
+          child: page,
+        );
+      },
+    ));
   }
 }

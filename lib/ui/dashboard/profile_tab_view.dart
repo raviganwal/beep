@@ -3,9 +3,11 @@ import 'package:beep/ui/dashboard/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/app_locator.dart';
 import '../../core/service/navigation_service.dart';
+import '../../core/viewmodel/auth_view_model.dart';
 import 'machines/add_machine_view.dart';
 import 'profile/my_team/my_team_view.dart';
 
@@ -19,6 +21,7 @@ class ProfileTabView extends StatefulWidget {
 class _ProfileTabViewState extends State<ProfileTabView> {
   @override
   Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.only(top: 0),
@@ -509,7 +512,9 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                 children: [
                   InkWell(
                     borderRadius: BorderRadius.circular(12.0),
-                    onTap: () {},
+                    onTap: () {
+                      authViewModel.logout();
+                    },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),

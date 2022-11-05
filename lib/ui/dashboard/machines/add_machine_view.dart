@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:beep/core/viewmodel/base_view_model.dart';
 import 'package:beep/core/viewmodel/machine_view_model.dart';
 import 'package:beep/ui/widget/button/app_button.dart';
 import 'package:flutter/foundation.dart';
@@ -10,7 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+import '../../widget/app_debug_print.dart';
 import '../../widget/button/white_app_button.dart';
+import '../../widget/textfield/app_text_field.dart';
 
 class AddMachineView extends StatefulWidget {
   const AddMachineView({Key? key}) : super(key: key);
@@ -23,10 +26,14 @@ class _AddMachineViewState extends State<AddMachineView> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  final _formKey = GlobalKey<FormState>();
+  final _machineCodeController = TextEditingController();
 
   @override
   void initState() {
     Future.delayed(const Duration(seconds: 1), () {
+      final machineViewModel = context.read<MachineViewModel>();
+      machineViewModel.autoValidateMode = AutovalidateMode.disabled;
       reassemble();
     });
     super.initState();
@@ -47,6 +54,7 @@ class _AddMachineViewState extends State<AddMachineView> {
   Widget build(BuildContext context) {
     final machineViewModel = context.watch<MachineViewModel>();
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           _buildQrView(context),
@@ -97,10 +105,20 @@ class _AddMachineViewState extends State<AddMachineView> {
               right: 24,
               child: WhiteAppButton(
                 onTap: () {
+                  machineViewModel.isMachineAdded = false;
                   inputCodeModal();
                 },
                 title: 'Input Machine Code',
-              ))
+              )),
+          machineViewModel.status == ViewStatus.loading
+              ? const Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : const SizedBox(),
         ],
       ),
     );
@@ -129,9 +147,15 @@ class _AddMachineViewState extends State<AddMachineView> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      setState(() {
-        result = scanData;
-      });
+      if ( result == null || scanData.code != result?.code) {
+        setState(() {
+          result = scanData;
+        });
+        appDebugPrint(
+            'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}');
+        final machineViewModel = context.read<MachineViewModel>();
+        machineViewModel.addMachine(qrCode: "${result?.code}");
+      }
     });
   }
 
@@ -159,124 +183,113 @@ class _AddMachineViewState extends State<AddMachineView> {
           topRight: Radius.circular(28),
         ),
       ),
+      isScrollControlled: true,
+      enableDrag: true,
       builder: (BuildContext context) {
         final machineViewModel = context.watch<MachineViewModel>();
-        return Container(
-          // decoration: const BoxDecoration(
-          //   borderRadius: BorderRadius.only(
-          //     topLeft: Radius.circular(28),
-          //     topRight: Radius.circular(28),
-          //   ),
-          //   color: Colors.white,
-          // ),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 30),
-                child: Row(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(left: 24),
-                      child: Text(
-                        "Add Machine",
-                        style: GoogleFonts.nunitoSans(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Form(
+            key: _formKey,
+            autovalidateMode: machineViewModel.autoValidateMode,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 30),
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(left: 24),
+                        child: Text(
+                          "Add Machine",
+                          style: GoogleFonts.nunitoSans(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(Icons.close)),
-                    const SizedBox(
-                      width: 8,
-                    )
-                  ],
-                ),
-              ),
-              if (!machineViewModel.isMachineAdded) ...[
-                const SizedBox(
-                  height: 103,
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 20),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: const BorderSide(
-                            width: 1,
-                            color: Color(0xFFEAEAEA),
-                          ),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          borderSide: BorderSide(
-                            width: 1,
-                            color: Color(0xFFEAEAEA),
-                          ),
-                        ),
-                        enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          borderSide: BorderSide(
-                            width: 1,
-                            color: Color(0xFFEAEAEA),
-                          ),
-                        ),
-                        hintStyle: GoogleFonts.nunitoSans(
-                            color: const Color(0xFF898989),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600),
-                        hintText: "Machine"),
+                      const Spacer(),
+                      IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(Icons.close)),
+                      const SizedBox(
+                        width: 8,
+                      )
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  height: 111,
-                ),
-              ],
-              if (machineViewModel.isMachineAdded) ...[
-                const SizedBox(
-                  height: 27,
-                ),
-                SvgPicture.asset("assets/svg/machine-added.svg"),
-                const SizedBox(
-                  height: 38,
-                ),
-                Text(
-                  "Beep Machine Added Successfully",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunitoSans(
-                    color: const Color(0xff212121),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                if (!machineViewModel.isMachineAdded) ...[
+                  const SizedBox(
+                    height: 103,
                   ),
-                ),
-                const SizedBox(
-                  height: 61,
-                ),
-              ],
-              Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  child: AppButton(
-                      onTap: () {
-                        machineViewModel.isMachineAdded =
-                            !machineViewModel.isMachineAdded;
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    child: AppTextField(
+                      controller: _machineCodeController,
+                      hintText: "Machine",
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter machine code';
+                        }
+                        return null;
                       },
-                      title:
-                          !machineViewModel.isMachineAdded ? 'Save' : 'Ok'))
-            ],
+                      textInputType: TextInputType.text,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 111,
+                  ),
+                ],
+                if (machineViewModel.isMachineAdded) ...[
+                  const SizedBox(
+                    height: 27,
+                  ),
+                  SvgPicture.asset("assets/svg/machine-added.svg"),
+                  const SizedBox(
+                    height: 38,
+                  ),
+                  Text(
+                    "Beep Machine Added Successfully",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunitoSans(
+                      color: const Color(0xff212121),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 61,
+                  ),
+                ],
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    child: AppButton(
+                        onTap: () async {
+                          if (!machineViewModel.isMachineAdded) {
+                            if (_formKey.currentState!.validate()) {
+                              await machineViewModel.addMachine(
+                                  qrCode: _machineCodeController.text);
+                            } else {
+                              machineViewModel.autoValidateMode =
+                                  AutovalidateMode.always;
+                            }
+                          } else {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        title:
+                            !machineViewModel.isMachineAdded ? 'Save' : 'Ok')),
+                const SizedBox(
+                  height: 53,
+                )
+              ],
+            ),
           ),
         );
       },

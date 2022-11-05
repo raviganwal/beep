@@ -58,7 +58,11 @@ class _MyTeamViewState extends State<MyTeamView> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/png/no-team-logo.png'),
+              Image.asset(
+                'assets/png/no-team-logo.png',
+                width: 173,
+                height: 170,
+              ),
               const SizedBox(
                 height: 54,
               ),

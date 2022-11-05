@@ -1,3 +1,0 @@
-class IssueModel {
-  String? date;
-}

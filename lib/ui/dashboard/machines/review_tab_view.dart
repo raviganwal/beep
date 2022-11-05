@@ -1,8 +1,12 @@
+import 'package:beep/core/viewmodel/base_view_model.dart';
+import 'package:beep/core/viewmodel/machine_view_model.dart';
+import 'package:beep/ui/widget/utility/no_data_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../widget/utility/no_data_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:beep/core/date_extension.dart';
+import 'dart:math';
 
 class ReviewTabView extends StatefulWidget {
   const ReviewTabView({Key? key}) : super(key: key);
@@ -13,7 +17,74 @@ class ReviewTabView extends StatefulWidget {
 
 class _ReviewTabViewState extends State<ReviewTabView> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      final machineViewModel = context.read<MachineViewModel>();
+      await machineViewModel.getMachineReviews();
+    });
+  }
+
+  _starWidget(String? rating) {
+    if (rating == null || rating.isEmpty) return [const SizedBox()];
+    double? numOfStar = double.tryParse(rating);
+    if (numOfStar == null) return;
+    int stars = numOfStar.toInt();
+    List<Widget> list = [];
+    for (int i = 0; i < stars; i++) {
+      list.add(Container(
+        margin: const EdgeInsets.only(right: 12),
+        child: SvgPicture.asset(
+          'assets/svg/star.svg',
+          width: 19,
+          height: 19,
+        ),
+      ));
+    }
+    return list;
+  }
+
+  _chipWidget(String? remarks) {
+    if (remarks == null || remarks.isEmpty) return [const SizedBox()];
+    List remarksArr = remarks.split(',');
+    List<Widget> list = [];
+    for (int i = 0; i < remarksArr.length; i++) {
+      list.add(
+        Container(
+          margin: const EdgeInsets.only(right: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xffe7faf3),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 4,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                remarksArr.elementAt(i),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunitoSans(
+                  color: const Color(0xff00ab6c),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return list;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final machineViewModel = context.watch<MachineViewModel>();
     return Scaffold(
       backgroundColor: const Color(0xFFF4F4F4),
       body: Container(
@@ -48,8 +119,9 @@ class _ReviewTabViewState extends State<ReviewTabView> {
               padding: EdgeInsets.zero,
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount: 2,
+              itemCount: machineViewModel.reviewsList.length,
               itemBuilder: (context, index) {
+                final review = machineViewModel.reviewsList.elementAt(index);
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
@@ -62,18 +134,20 @@ class _ReviewTabViewState extends State<ReviewTabView> {
                       const SizedBox(
                         height: 13,
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            "Sep 12, 2022 - 3:45 PM",
-                            style: GoogleFonts.nunitoSans(
-                              color: Color(0xff898989),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                      if (review.createdAt != null)
+                        Row(
+                          children: [
+                            Text(
+                              review.createdAt!.toyyyyMMddhhmmssParse
+                                  .toMMMDddyyyyhhmma,
+                              style: GoogleFonts.nunitoSans(
+                                color: const Color(0xff898989),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                       const SizedBox(
                         height: 10,
                       ),
@@ -85,53 +159,15 @@ class _ReviewTabViewState extends State<ReviewTabView> {
                         height: 19,
                       ),
                       Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/svg/star.svg',
-                            width: 19,
-                            height: 19,
-                          ),
-                          const SizedBox(
-                            width: 12,
-                          ),
-                          SvgPicture.asset(
-                            'assets/svg/star.svg',
-                            width: 19,
-                            height: 19,
-                          ),
-                          const SizedBox(
-                            width: 12,
-                          ),
-                          SvgPicture.asset(
-                            'assets/svg/star.svg',
-                            width: 19,
-                            height: 19,
-                          ),
-                          const SizedBox(
-                            width: 12,
-                          ),
-                          SvgPicture.asset(
-                            'assets/svg/star.svg',
-                            width: 19,
-                            height: 19,
-                          ),
-                          const SizedBox(
-                            width: 12,
-                          ),
-                          SvgPicture.asset(
-                            'assets/svg/star-empty.svg',
-                            width: 19,
-                            height: 19,
-                          )
-                        ],
+                        children: _starWidget(review.rating),
                       ),
                       const SizedBox(
                         height: 16,
                       ),
-                      const Text(
-                        "It was my experience and I can tell you that I’m SATISFIED with this service!",
-                        style: TextStyle(
-                          color: Color(0xff212121),
+                      Text(
+                        review.message.toString(),
+                        style: GoogleFonts.nunitoSans(
+                          color: const Color(0xff212121),
                           fontSize: 13,
                         ),
                       ),
@@ -146,63 +182,7 @@ class _ReviewTabViewState extends State<ReviewTabView> {
                         height: 20,
                       ),
                       Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: const Color(0xffe7faf3),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Good Location",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.nunitoSans(
-                                    color: Color(0xff00ab6c),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Color(0xffe7faf3),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Clean",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.nunitoSans(
-                                    color: Color(0xff00ab6c),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
+                        children: _chipWidget(review.remarks),
                       ),
                       const SizedBox(
                         height: 20,

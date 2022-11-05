@@ -28,6 +28,7 @@ class _ReferralTabViewState extends State<ReferralTabView> {
           child: AppBar(
             titleSpacing: 0,
             elevation: 0,
+            centerTitle: false,
             title: Row(
               children: [
                 const SizedBox(
