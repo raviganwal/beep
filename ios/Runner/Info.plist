@@ -23,9 +23,24 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>TemporaryPreciseAccuracy</key>
+		<string>The App requires temporary access to the device's precise location.</string>
+	</dict>
+	<key>io.flutter.embedded_views_preview</key>
+    <true/>
+    <key>NSCameraUsageDescription</key>
+    <string>This app needs camera access to scan QR codes</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>The App requires access to the device's location.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>This app needs camera access</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app needs photos access</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -45,13 +60,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-    	<string>The App requires access to the device&apos;s location.</string>
-    	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
-    	<dict>
-    		<key>TemporaryPreciseAccuracy</key>
-    		<string>The App requires temporary access to the device&apos;s precise location.</string>
-    	</dict>
-
 </dict>
 </plist>

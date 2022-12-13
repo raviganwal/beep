@@ -37,6 +37,7 @@ class _ReferralViewState extends State<ReferralView> {
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -64,8 +65,8 @@ class _ReferralViewState extends State<ReferralView> {
                   children: [
                     Image.asset(
                       "assets/png/referral.png",
-                      width: 180,
-                      height: 220,
+                      width: 139,
+                      height: 170,
                     ),
                     const SizedBox(
                       height: 49,

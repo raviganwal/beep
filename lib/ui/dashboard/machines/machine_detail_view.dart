@@ -91,27 +91,39 @@ class _MachineDetailsViewState extends State<MachineDetailsView> {
           child: BottomNavigationBar(
             elevation: 0,
             backgroundColor: Colors.white,
+            selectedLabelStyle: GoogleFonts.nunitoSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: GoogleFonts.nunitoSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: 2),
                   child: SvgPicture.asset(
                     'assets/svg/stats-icon.svg',
                     color: _selectedIndex == 0
                         ? const Color(0xff00ab6c)
                         : const Color(0xff898989),
+                    height: 30,
+                    width: 30,
                   ),
                 ),
                 label: 'Stats',
               ),
               BottomNavigationBarItem(
                 icon: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: 2),
                   child: SvgPicture.asset(
                     'assets/svg/reviews-icon.svg',
                     color: _selectedIndex == 1
                         ? const Color(0xff00ab6c)
                         : const Color(0xff898989),
+                    height: 30,
+                    width: 30,
                   ),
                 ),
                 label: 'Reviews',
@@ -119,7 +131,7 @@ class _MachineDetailsViewState extends State<MachineDetailsView> {
               BottomNavigationBarItem(
                 icon: Container(
                   width: 50,
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: 2),
                   child: Stack(
                     children: [
                       Center(
@@ -128,6 +140,8 @@ class _MachineDetailsViewState extends State<MachineDetailsView> {
                           color: _selectedIndex == 2
                               ? const Color(0xff00ab6c)
                               : const Color(0xff898989),
+                          height: 30,
+                          width: 30,
                         ),
                       ),
                       if (machineViewModel.selectedMahcine.issues !=
@@ -143,24 +157,28 @@ class _MachineDetailsViewState extends State<MachineDetailsView> {
               ),
               BottomNavigationBarItem(
                 icon: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: 2),
                   child: SvgPicture.asset(
                     'assets/svg/assigned-icon.svg',
                     color: _selectedIndex == 3
                         ? const Color(0xff00ab6c)
                         : const Color(0xff898989),
+                    height: 30,
+                    width: 30,
                   ),
                 ),
                 label: 'Assigned',
               ),
               BottomNavigationBarItem(
                 icon: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: 2),
                   child: SvgPicture.asset(
                     'assets/svg/settings-icon.svg',
                     color: _selectedIndex == 4
                         ? const Color(0xff00ab6c)
                         : const Color(0xff898989),
+                    height: 30,
+                    width: 30,
                   ),
                 ),
                 label: 'Settings',

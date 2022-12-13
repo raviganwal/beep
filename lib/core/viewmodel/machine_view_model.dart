@@ -2,12 +2,17 @@ import 'package:beep/core/app_status.dart';
 import 'package:beep/core/model/assigned_model.dart';
 import 'package:beep/core/model/machine_issues_model.dart';
 import 'package:beep/core/model/machine_model.dart';
+import 'package:beep/core/model/machine_stats_model.dart';
+import 'package:beep/core/model/machine_team_model.dart';
+import 'package:beep/core/model/report_options_model.dart';
 import 'package:beep/core/viewmodel/auth_view_model.dart';
 import 'package:beep/core/viewmodel/base_view_model.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../ui/widget/app_debug_print.dart';
 import '../app_locator.dart';
@@ -30,9 +35,12 @@ class MachineViewModel extends BaseViewModel {
 
   List<Machine> machineList = [];
   List<Machine> attentionsList = [];
-  List<AssignedModel> assignedList = [];
+  List<TeamMembers> machineTeamList = [];
   List<Issue> issuesList = [];
   List<Review> reviewsList = [];
+  List<DailyStats> dailyStatsList = [];
+  List<MonthlyStats> monthlyStatsList = [];
+  List<ReportOption> reportOptionsList = [];
   bool _isMachineAdded = false;
   bool _flashToggle = false;
 
@@ -42,8 +50,26 @@ class MachineViewModel extends BaseViewModel {
   bool _enableFoamHeater = false;
   bool _enableLight = false;
   bool _enablePublicAccess = false;
+  bool _enableMaintenance = false;
 
   late Machine _selectedMahcine;
+  late ReportOption _selectedReportOption;
+
+  XFile? _pickedFile;
+
+  XFile? get pickedFile => _pickedFile;
+
+  set pickedFile(XFile? value) {
+    _pickedFile = value;
+    notifyListeners();
+  }
+
+  bool get enableMaintenance => _enableMaintenance;
+
+  set enableMaintenance(bool value) {
+    _enableMaintenance = value;
+    notifyListeners();
+  }
 
   Placemark? get placemark => _placemark;
 
@@ -56,6 +82,13 @@ class MachineViewModel extends BaseViewModel {
 
   set currentPosition(Position? value) {
     _currentPosition = value;
+    notifyListeners();
+  }
+
+  ReportOption get selectedReportOption => _selectedReportOption;
+
+  set selectedReportOption(ReportOption value) {
+    _selectedReportOption = value;
     notifyListeners();
   }
 
@@ -129,9 +162,20 @@ class MachineViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  machineStatusStr({Machine? machine}) {
+    if (machine?.publicAccess == "1") {
+      return "Private";
+    } else if (machine?.maintenanceMode == "1") {
+      return "Maintenance";
+    } else {
+      return null;
+    }
+  }
+
   checkMachineStatus({Machine? machine}) {
     machine ??= selectedMahcine;
-    if (machine.isActive == "1" &&
+    if (machine.err == "0" &&
+        machine.maintenanceMode == "0" &&
         machine.foamTank == "0" &&
         machine.waterTank == "0" &&
         machine.waterHeater == "0" &&
@@ -140,10 +184,11 @@ class MachineViewModel extends BaseViewModel {
         machine.voice == "0" &&
         (machine.issues == "0")) {
       return MachineStatus.operatesNormally;
-    } else if (machine.isActive == "0") {
+    } else if (machine.err == "1") {
       return MachineStatus.offline;
-    } else if (machine.isActive == "1" &&
+    } else if (machine.err == "0" &&
         (machine.foamTank == "1" ||
+            machine.maintenanceMode == "1" ||
             machine.waterTank == "1" ||
             machine.waterHeater == "1" ||
             machine.foamHeater == "1" ||
@@ -177,7 +222,7 @@ class MachineViewModel extends BaseViewModel {
       }
     } else {
       Fluttertoast.showToast(msg: response['msg']);
-      if (authViewModel == null) authViewModel?.logout();
+      if (authViewModel != null) authViewModel.logout();
     }
     notifyListeners();
   }
@@ -194,6 +239,25 @@ class MachineViewModel extends BaseViewModel {
     setStatus(ViewStatus.ready);
     if (response["code"] == 200) {
       selectedMahcine = Machine.fromJson(response['data']);
+    }
+    notifyListeners();
+  }
+
+  getMachineStats() async {
+    dailyStatsList.clear();
+    monthlyStatsList.clear();
+    final params = {
+      "machine_id": selectedMahcine.id,
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: "")
+    };
+    appDebugPrint("getMachineStats params $params");
+    final response = await apiService.post(ApiUrl.getMachineStats, params);
+    if (response["code"] == 200) {
+      MachineStatsModel machineStatsModel =
+          MachineStatsModel.fromJson(response);
+      dailyStatsList.addAll(machineStatsModel.dailyStats!);
+      monthlyStatsList.addAll(machineStatsModel.monthlyStats!);
     }
     notifyListeners();
   }
@@ -269,7 +333,7 @@ class MachineViewModel extends BaseViewModel {
     setStatus(ViewStatus.ready);
     if (response["code"] == 200) {
       MachineReviewsModel machineReviewsModel =
-      MachineReviewsModel.fromJson(response);
+          MachineReviewsModel.fromJson(response);
       reviewsList.addAll(machineReviewsModel.data!);
     } else {
       Fluttertoast.showToast(msg: response['msg']);
@@ -277,16 +341,17 @@ class MachineViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  saveMachineSettings({required String machineName,
-    required String address,
-    required String cityId}) async {
+  saveMachineSettings(
+      {required String machineName,
+      required String address,
+      required String cityId}) async {
     reviewsList.clear();
     setStatus(ViewStatus.loading);
     final params = {
       "machine_id": selectedMahcine.id,
       "token": await _sharedPrefService.getStringKey(
           key: SharedPrefService.token, defValue: ""),
-      "is_active": enablePublicAccess ? "1" : "0",
+      // "is_active": enablePublicAccess ? "1" : "0",
       "water_heater": enableWaterHeater ? "0" : "1",
       "foam_heater": enableFoamHeater ? "0" : "1",
       "foam_tank": selectedMahcine.foamTank,
@@ -300,7 +365,9 @@ class MachineViewModel extends BaseViewModel {
       "country": placemark?.country,
       "postal_code": placemark?.postalCode,
       "machine_lat": currentPosition?.latitude,
-      "machine_long": currentPosition?.longitude
+      "machine_long": currentPosition?.longitude,
+      "public_access": enablePublicAccess ? "0" : "1",
+      "maintenance_mode": enableMaintenance ? "1" : "0",
     };
 
     appDebugPrint("saveMachineSettings params $params");
@@ -313,20 +380,60 @@ class MachineViewModel extends BaseViewModel {
     getAllMachine();
   }
 
-  getAssignedList() {
-    assignedList.clear();
-    assignedList.add(AssignedModel(
-      "Ray Alexander",
-      "Operator - Machine 1",
-      "example@email.com",
-      "+12344567584",
-    ));
-    assignedList.add(AssignedModel(
-      "Sean Justin",
-      "Techinician",
-      "example@email.com",
-      "+12344567584",
-    ));
+  getMachineTeam() async {
+    machineTeamList.clear();
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "machine_id": selectedMahcine.id
+    };
+    appDebugPrint("getMachineList params $params");
+    final response = await apiService.post(ApiUrl.getMachineTeam, params);
+    setStatus(ViewStatus.ready);
+    if (response["code"] == 200) {
+      MachineTeamModel machineTeamModel = MachineTeamModel.fromJson(response);
+      machineTeamList.addAll(machineTeamModel.teamMembers!);
+    } else {
+      Fluttertoast.showToast(msg: response['msg']);
+    }
     notifyListeners();
+  }
+
+  getReportOptions() async {
+    reportOptionsList.clear();
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+    };
+    appDebugPrint("getReportOptions params $params");
+    final response = await apiService.post(ApiUrl.getReportOptions, params);
+    setStatus(ViewStatus.ready);
+    if (response["code"] == 200) {
+      ReportOptionsModel reportOptionsModel =
+          ReportOptionsModel.fromJson(response);
+      reportOptionsList.addAll(reportOptionsModel.data!);
+      selectedReportOption = reportOptionsList.first;
+    }
+    notifyListeners();
+  }
+
+  submitReport({required String comment}) async {
+    setStatus(ViewStatus.loading);
+    String fileName = pickedFile!.path.split('/').last;
+    FormData params = FormData.fromMap({
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "machine_id": selectedMahcine.id,
+      "issue_id": selectedReportOption.id,
+      "comment": comment,
+      'attachment':
+          await MultipartFile.fromFile(pickedFile!.path, filename: fileName),
+    });
+    appDebugPrint("submitReport params $params");
+    final response = await apiService.post(ApiUrl.submitReport, params);
+    setStatus(ViewStatus.ready);
+    Fluttertoast.showToast(msg: response['msg']);
   }
 }

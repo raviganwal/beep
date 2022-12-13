@@ -24,8 +24,8 @@ class _NotificationTabViewState extends State<NotificationTabView> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final notificationsViewModel = context.read<NotificationsViewModel>();
+      notificationsViewModel.clearMessageList();
       notificationsViewModel.clearNotificationList();
-      // notificationsViewModel.getNotifications();
     });
     super.initState();
   }

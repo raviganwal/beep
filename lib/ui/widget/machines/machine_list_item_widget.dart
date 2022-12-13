@@ -42,11 +42,51 @@ class MachineListItemWidget extends StatelessWidget {
               onTap: onTap,
               child: Container(
                 padding: const EdgeInsets.only(
-                    top: 16, bottom: 21, left: 12, right: 12),
+                    top: 4, bottom: 21, left: 12, right: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    SizedBox(
+                      width: 122,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (machineViewModel.machineStatusStr(
+                                  machine: machine) !=
+                              null) ...[
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                color: machineViewModel.machineStatusStr(
+                                            machine: machine) ==
+                                        "Private"
+                                    ? const Color(0xFF00AB6C).withOpacity(.2)
+                                    : const Color(0xff828282).withOpacity(.2),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 1),
+                              child: Text(
+                                machineViewModel.machineStatusStr(
+                                    machine: machine),
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.nunitoSans(
+                                  color: machineViewModel.machineStatusStr(
+                                              machine: machine) ==
+                                          "Private"
+                                      ? const Color(0xFF00AB6C)
+                                      : const Color(0xff828282),
+                                  fontSize: 7,
+                                ),
+                              ),
+                            ),
+                          ]
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 4,
+                    ),
                     Container(
                       width: 122,
                       height: 122,
@@ -63,14 +103,17 @@ class MachineListItemWidget extends StatelessWidget {
                         children: [
                           Image.asset(
                             machineViewModel.checkMachineStatus(
-                                        machine: machine) ==
-                                    MachineStatus.offline
+                                            machine: machine) ==
+                                        MachineStatus.offline ||
+                                    machineViewModel.machineStatusStr(
+                                            machine: machine) ==
+                                        "Maintenance"
                                 ? 'assets/png/machine-image-offline.png'
                                 : 'assets/png/machine-image.png',
                             width: 83,
                             height: 102,
                           ),
-                          if (machine.isActive == AppStatus.offline)
+                          if (machine.err == AppStatus.offline)
                             Positioned(
                               left: 0,
                               right: 0,
@@ -138,8 +181,11 @@ class MachineListItemWidget extends StatelessWidget {
                         children: [
                           SvgPicture.asset(
                             machineViewModel.checkMachineStatus(
-                                        machine: machine) ==
-                                    MachineStatus.offline
+                                            machine: machine) ==
+                                        MachineStatus.offline ||
+                                    machineViewModel.machineStatusStr(
+                                            machine: machine) ==
+                                        "Maintenance"
                                 ? 'assets/svg/foam-icon-grey.svg'
                                 : machine.foamTank == AppStatus.foamNormal
                                     ? 'assets/svg/foam-icon.svg'
@@ -182,8 +228,11 @@ class MachineListItemWidget extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(3),
                             color: machineViewModel.checkMachineStatus(
-                                        machine: machine) ==
-                                    MachineStatus.offline
+                                            machine: machine) ==
+                                        MachineStatus.offline ||
+                                    machineViewModel.machineStatusStr(
+                                            machine: machine) ==
+                                        "Maintenance"
                                 ? const Color(0xffc4c4c4)
                                 : machine.foamTank == AppStatus.foamNormal
                                     ? const Color(0xff00dd8d)
@@ -200,8 +249,11 @@ class MachineListItemWidget extends StatelessWidget {
                       child: Row(
                         children: [
                           SvgPicture.asset(machineViewModel.checkMachineStatus(
-                                      machine: machine) ==
-                                  MachineStatus.offline
+                                          machine: machine) ==
+                                      MachineStatus.offline ||
+                                  machineViewModel.machineStatusStr(
+                                          machine: machine) ==
+                                      "Maintenance"
                               ? 'assets/svg/water-icon-grey.svg'
                               : machine.waterTank == AppStatus.waterNormal
                                   ? 'assets/svg/water-icon.svg'
@@ -245,8 +297,11 @@ class MachineListItemWidget extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(3),
                             color: machineViewModel.checkMachineStatus(
-                                        machine: machine) ==
-                                    MachineStatus.offline
+                                            machine: machine) ==
+                                        MachineStatus.offline ||
+                                    machineViewModel.machineStatusStr(
+                                            machine: machine) ==
+                                        "Maintenance"
                                 ? const Color(0xffc4c4c4)
                                 : machine.waterTank == AppStatus.waterNormal
                                     ? const Color(0xff00ab6c)
@@ -284,7 +339,7 @@ class MachineListItemWidget extends StatelessWidget {
                           height: 1.54545454545,
                           fontSize: 11,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

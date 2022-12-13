@@ -116,6 +116,7 @@ class AppTextField extends StatelessWidget {
             color: const Color(0xFF898989),
             fontSize: 17,
             fontWeight: FontWeight.w600),
+        prefixIcon: prefixIcon,
         hintText: hintText,
         suffixIcon: suffixIcon,
       ),

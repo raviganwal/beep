@@ -50,8 +50,8 @@ class _SignupCompleteState extends State<SignupComplete> {
                   children: [
                     Image.asset(
                       "assets/png/complete.png",
-                      width: 163,
-                      height: 316,
+                      width: 140,
+                      height: 271,
                     ),
                     const SizedBox(
                       height: 49,

@@ -27,6 +27,10 @@ class NavigationService {
     return _navigatorKey.currentState!.pop();
   }
 
+  void popAwait({required String key, required dynamic value}) {
+    _navigatorKey.currentState!.pop({key: value});
+  }
+
   Future<dynamic> navigateTo(String routeName, {dynamic arguments}) {
     return _navigatorKey.currentState!
         .pushNamed(routeName, arguments: arguments);

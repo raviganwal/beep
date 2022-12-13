@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/app_locator.dart';
@@ -25,6 +26,7 @@ class _OtpViewState extends State<OtpView> {
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -51,8 +53,8 @@ class _OtpViewState extends State<OtpView> {
                   children: [
                     Image.asset(
                       "assets/png/phone.png",
-                      width: 180,
-                      height: 220,
+                      width: 139,
+                      height: 170,
                     ),
                     const SizedBox(
                       height: 35,
@@ -83,31 +85,51 @@ class _OtpViewState extends State<OtpView> {
                     const SizedBox(
                       height: 32,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        OtpTextField(
-                          numberOfFields: 4,
-                          borderColor: const Color(0xFFD9D9D9),
-                          focusedBorderColor: const Color(0xFF00AB6C),
-                          // styles: otpTextStyles,
-                          showFieldAsBox: false,
-                          borderWidth: 2.0,
+                    PinCodeTextField(
+                      scrollPadding: const EdgeInsets.only(bottom:300),
+                      length: 4,
+                      obscureText: false,
+                      animationType: AnimationType.fade,
+                      keyboardType: TextInputType.number,
+                      pinTheme: PinTheme(
+                          // borderRadius: BorderRadius.circular(5),
+                          fieldHeight: 50,
                           fieldWidth: MediaQuery.of(context).size.width * .16,
-                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                          textStyle: GoogleFonts.nunitoSans(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xff212121),
+                          activeFillColor: Colors.transparent,
+                          shape: PinCodeFieldShape.underline,
+                          borderRadius: BorderRadius.circular(5),
+                          selectedColor: const Color(0xFF00AB6C),
+                          selectedFillColor: Colors.transparent,
+                          inactiveColor: const Color(0xFFD9D9D9),
+                          inactiveFillColor: Colors.transparent
+                          //     borderColor: const Color(0xFFD9D9D9),
+                          // focusedBorderColor: const Color(0xFF00AB6C),
                           ),
-                          onCodeChanged: (String code) {
-                          },
-                          //runs when every textfield is filled
-                          onSubmit: (String verificationCode) {
-                            authViewModel.otpCodeInput = verificationCode;
-                          },
-                        ),
-                      ],
+                      animationDuration: const Duration(milliseconds: 300),
+                      enableActiveFill: true,
+                      // errorAnimationController: errorController,
+                      // controller: textEditingController,
+                      onCompleted: (v) {
+                        print("Completed");
+                      },
+                      onChanged: (value) {
+                        print(value);
+                      },
+                      beforeTextPaste: (text) {
+                        print("Allowing to paste $text");
+                        //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
+                        //but you can show anything you want here, like your pop up saying wrong paste format or etc
+                        return true;
+                      },
+                      appContext: context,
+                      pastedTextStyle: GoogleFonts.nunitoSans(
+                        color: const Color(0xff212121),
+                      ),
+                      textStyle: GoogleFonts.nunitoSans(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xff212121),
+                      ),
                     ),
                     const SizedBox(
                       height: 30,

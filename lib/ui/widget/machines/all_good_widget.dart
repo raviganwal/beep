@@ -36,7 +36,7 @@ class AllGoodWidget extends StatelessWidget {
               height: 15,
             ),
             Text(
-              "All machines still work normally, no need to worry.",
+              "All your machines are operating normally, no need to worry.",
               textAlign: TextAlign.center,
               style: GoogleFonts.nunitoSans(
                 color: const Color(0xff898989),

@@ -1,6 +1,5 @@
 import 'package:beep/core/viewmodel/machine_view_model.dart';
 import 'package:beep/core/viewmodel/notifications_view_model.dart';
-import 'package:beep/core/viewmodel/team_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,9 +24,6 @@ class AppProvider extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => MachineViewModel(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => TeamViewModel(),
         ),
         ChangeNotifierProvider(
           create: (context) => NotificationsViewModel(),

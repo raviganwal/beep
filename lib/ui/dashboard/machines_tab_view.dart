@@ -7,7 +7,6 @@ import 'package:beep/ui/dashboard/machines/machine_detail_view.dart';
 import 'package:beep/ui/dashboard/machines/stats_tab_view.dart';
 import 'package:beep/ui/widget/machines/machine_list_item_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -144,7 +143,7 @@ class _MachinesTabViewState extends State<MachinesTabView> {
                   ),
                 ),
                 SizedBox(
-                  height: 330,
+                  height: 344,
                   child: ListView.separated(
                     padding: const EdgeInsets.only(
                         left: 24, bottom: 20, top: 10, right: 24),
@@ -204,7 +203,7 @@ class _MachinesTabViewState extends State<MachinesTabView> {
                     : machineViewModel.attentionsList.isEmpty
                         ? const AllGoodWidget()
                         : SizedBox(
-                            height: 330,
+                            height: 344,
                             child: ListView.separated(
                               padding: const EdgeInsets.only(
                                   left: 24, bottom: 20, top: 10, right: 24),

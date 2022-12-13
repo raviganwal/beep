@@ -1,6 +1,5 @@
 import 'package:beep/core/date_extension.dart';
-import 'package:beep/core/model/messages_model.dart';
-import 'package:beep/core/model/notification_model.dart';
+import 'package:beep/core/model/notifications_model.dart';
 import 'package:beep/core/service/api_url.dart';
 import 'package:beep/core/viewmodel/base_view_model.dart';
 import 'package:beep/core/viewmodel/notifications_view_model.dart';
@@ -23,10 +22,10 @@ class _NotificationsViewState extends State<NotificationsView> {
   void initState() {
     super.initState();
     controller = ScrollController()..addListener(_scrollListener);
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   final notificationsViewModel = context.read<NotificationsViewModel>();
-    //   notificationsViewModel.getNotifications();
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final notificationsViewModel = context.read<NotificationsViewModel>();
+      notificationsViewModel.getNotifications();
+    });
   }
 
   @override
@@ -41,68 +40,62 @@ class _NotificationsViewState extends State<NotificationsView> {
               controller: controller,
               itemCount: notificationsViewModel.notificationsList.length,
               itemBuilder: (context, index) {
-                Message notification =
+                NotificationData notification =
                     notificationsViewModel.notificationsList.elementAt(index);
-                return Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-                  // color: const Color(0xffe7faf3),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (notification.notifTitle != null) ...[
+                return InkWell(
+                  onTap: () {
+                    notificationsViewModel.markAsNotified(
+                        notification: notification);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 24),
+                    color: notification.notified == "1"
+                        ? Colors.transparent
+                        : const Color(0xffe7faf3),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (notification.notifTitle != null) ...[
+                              Text(
+                                notification.notifTitle.toString(),
+                                style: GoogleFonts.nunitoSans(
+                                  color: const Color(0xff00ab6c),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              )
+                            ],
+                            const Spacer(),
                             Text(
-                              notification.notifTitle.toString(),
+                              notification.createdAt!.toyyyyMMddParse.toEEEMMMdd
+                                  .toString(),
+                              textAlign: TextAlign.right,
                               style: GoogleFonts.nunitoSans(
-                                color: const Color(0xff00ab6c),
-                                fontSize: 17,
+                                color: const Color(0xff898989),
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                               ),
                             )
                           ],
-                          const Spacer(),
-                          Text(
-                            notification.createdAt!.toyyyyMMddParse.toEEEMMMdd
-                                .toString(),
-                            textAlign: TextAlign.right,
-                            style: GoogleFonts.nunitoSans(
-                              color: const Color(0xff898989),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        notification.notifBody.toString(),
-                        style: GoogleFonts.nunitoSans(
-                          color: const Color(0xff212121),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      if (notification.image != null) ...[
                         const SizedBox(
-                          height: 20,
+                          height: 10,
                         ),
-                        ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              ApiUrl.imageUrlNotifications +
-                                  notification.image!,
-                              height: 130,
-                              width: MediaQuery.of(context).size.width,
-                              fit: BoxFit.fitWidth,
-                            )),
-                      ]
-                    ],
+                        Text(
+                          notification.description.toString(),
+                          style: GoogleFonts.nunitoSans(
+                            color: const Color(0xff212121),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -116,7 +109,7 @@ class _NotificationsViewState extends State<NotificationsView> {
           ),
           AnimatedContainer(
             height: notificationsViewModel.status == ViewStatus.loading &&
-                    notificationsViewModel.page > 1
+                    notificationsViewModel.pageNotification > 1
                 ? 60
                 : 0,
             duration: const Duration(milliseconds: 200),
@@ -137,12 +130,12 @@ class _NotificationsViewState extends State<NotificationsView> {
   }
 
   void _scrollListener() {
-    // appDebugPrint(controller.position.extentAfter.toString());
     if (controller.position.extentAfter < 100) {
       final notificationsViewModel = context.read<NotificationsViewModel>();
       if (notificationsViewModel.status == ViewStatus.ready) {
         notificationsViewModel.getMessages();
-        appDebugPrint("page count ${notificationsViewModel.page}");
+        appDebugPrint(
+            "pageNotification  ${notificationsViewModel.pageNotification}");
       }
     }
   }

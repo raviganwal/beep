@@ -1,9 +1,6 @@
-import 'package:beep/core/model/assigned_model.dart';
-import 'package:beep/core/model/machine_model.dart';
 import 'package:beep/core/model/messages_model.dart';
-import 'package:beep/core/model/notification_model.dart';
+import 'package:beep/core/model/notifications_model.dart';
 import 'package:beep/core/viewmodel/base_view_model.dart';
-import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../ui/widget/app_debug_print.dart';
@@ -16,8 +13,16 @@ class NotificationsViewModel extends BaseViewModel {
   final apiService = locator<ApiService>();
   final _sharedPrefService = locator<SharedPrefService>();
   List<Message> messagesList = [];
-  List<Message> notificationsList = [];
+  List<NotificationData> notificationsList = [];
   int _page = 1;
+  int _pageNotification = 1;
+
+  int get pageNotification => _pageNotification;
+
+  set pageNotification(int value) {
+    _pageNotification = value;
+    notifyListeners();
+  }
 
   int get page => _page;
 
@@ -26,9 +31,14 @@ class NotificationsViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  clearNotificationList() {
+  clearMessageList() {
     messagesList.clear();
     page = 1;
+  }
+
+  clearNotificationList() {
+    notificationsList.clear();
+    pageNotification = 1;
   }
 
   getMessages() async {
@@ -50,5 +60,40 @@ class NotificationsViewModel extends BaseViewModel {
       }
     }
     notifyListeners();
+  }
+
+  getNotifications() async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+    };
+    appDebugPrint("getNotifications params $params");
+    final response = await apiService.post(
+        "${ApiUrl.getNotifications}${'?page=$pageNotification'}", params);
+    setStatus(ViewStatus.ready);
+    if (response["code"] == 200) {
+      NotificationsModel notificationsModel =
+          NotificationsModel.fromJson(response);
+      if (notificationsModel.data != null &&
+          notificationsModel.data!.isNotEmpty) {
+        notificationsList.addAll(notificationsModel.data!);
+        pageNotification++;
+      }
+    }
+    notifyListeners();
+  }
+
+  markAsNotified({required NotificationData notification}) async {
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "notif_id": "${notification.id}"
+    };
+    appDebugPrint("markAsNotified params $params");
+    final response = await apiService.post(ApiUrl.markAsNotified, params);
+    if(response['code']==200) {
+      Fluttertoast.showToast(msg: response['msg']);
+    }
   }
 }

@@ -1,6 +1,6 @@
 class AppStatus {
-  static const online = "1";
-  static const offline = "0";
+  static const online = "0";
+  static const offline = "1";
 
   static const foamNormal = "0";
   static const foamShortage = "1";
@@ -12,5 +12,7 @@ class AppStatus {
 
   //applicable for voice, water heater, foam heater, light
   static const normal = "0";
-  static const disable = "1";
+  static const abnormal = "1";
+
+
 }

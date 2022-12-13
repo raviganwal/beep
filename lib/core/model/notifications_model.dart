@@ -1,26 +1,20 @@
-class MessagesModel {
+class NotificationsModel {
   int? code;
   int? totalRecords;
   int? limitPerPage;
-  String? notifUrl;
-  List<Message>? data;
+  List<NotificationData>? data;
 
-  MessagesModel(
-      {this.code,
-      this.totalRecords,
-      this.limitPerPage,
-      this.notifUrl,
-      this.data});
+  NotificationsModel(
+      {this.code, this.totalRecords, this.limitPerPage, this.data});
 
-  MessagesModel.fromJson(Map<String, dynamic> json) {
+  NotificationsModel.fromJson(Map<String, dynamic> json) {
     code = json['code'];
     totalRecords = json['total_records'];
     limitPerPage = json['limit_per_page'];
-    notifUrl = json['notif_url'];
     if (json['data'] != null) {
-      data = <Message>[];
+      data = <NotificationData>[];
       json['data'].forEach((v) {
-        data!.add(Message.fromJson(v));
+        data!.add(NotificationData.fromJson(v));
       });
     }
   }
@@ -30,7 +24,6 @@ class MessagesModel {
     data['code'] = code;
     data['total_records'] = totalRecords;
     data['limit_per_page'] = limitPerPage;
-    data['notif_url'] = notifUrl;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -38,35 +31,35 @@ class MessagesModel {
   }
 }
 
-class Message {
+class NotificationData {
+  String? id;
   String? notifTitle;
-  String? notifBody;
-  String? image;
-  String? notifUrl;
+  String? description;
   String? createdAt;
+  String? notified;
 
-  Message(
-      {this.notifTitle,
-      this.notifBody,
-      this.image,
-      this.notifUrl,
-      this.createdAt});
+  NotificationData(
+      {this.id,
+        this.notifTitle,
+        this.description,
+        this.createdAt,
+        this.notified});
 
-  Message.fromJson(Map<String, dynamic> json) {
+  NotificationData.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     notifTitle = json['notif_title'];
-    notifBody = json['notif_body'];
-    image = json['image'];
-    notifUrl = json['notif_url'];
+    description = json['description'];
     createdAt = json['created_at'];
+    notified = json['notified'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
     data['notif_title'] = notifTitle;
-    data['notif_body'] = notifBody;
-    data['image'] = image;
-    data['notif_url'] = notifUrl;
+    data['description'] = description;
     data['created_at'] = createdAt;
+    data['notified'] = notified;
     return data;
   }
 }

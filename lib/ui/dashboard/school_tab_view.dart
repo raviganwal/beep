@@ -169,7 +169,7 @@ class _SchoolTabViewState extends State<SchoolTabView> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 13),
+                  const SizedBox(height: 9),
                   InkWell(
                     onTap: () {
                       _launchInBrowser(article.articleUrl.toString());

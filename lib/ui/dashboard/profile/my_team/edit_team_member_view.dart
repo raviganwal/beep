@@ -1,5 +1,6 @@
 import 'package:beep/core/app_validators.dart';
 import 'package:beep/core/model/my_team_machine_model.dart';
+import 'package:beep/core/model/my_team_model.dart';
 import 'package:beep/core/model/user_role_model.dart';
 import 'package:beep/core/viewmodel/auth_view_model.dart';
 import 'package:beep/ui/widget/textfield/app_text_field.dart';
@@ -11,14 +12,17 @@ import 'package:provider/provider.dart';
 
 import '../../../widget/button/app_button.dart';
 
-class AddTeamMemberView extends StatefulWidget {
-  const AddTeamMemberView({Key? key}) : super(key: key);
+class EditTeamMemberView extends StatefulWidget {
+  final TeamMembers teamMember;
+
+  const EditTeamMemberView({Key? key, required this.teamMember})
+      : super(key: key);
 
   @override
-  State<AddTeamMemberView> createState() => _AddTeamMemberViewState();
+  State<EditTeamMemberView> createState() => _EditTeamMemberViewState();
 }
 
-class _AddTeamMemberViewState extends State<AddTeamMemberView> {
+class _EditTeamMemberViewState extends State<EditTeamMemberView> {
   final _formKey = GlobalKey<FormState>();
   final _firsNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -32,8 +36,20 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final authViewModel = context.read<AuthViewModel>();
       authViewModel.autoValidateModeAddTeamMember = AutovalidateMode.disabled;
-      authViewModel.getRoleList();
-      authViewModel.getAssignTo();
+      await authViewModel.getRoleList();
+      await authViewModel.getAssignTo();
+      _firsNameController.text = widget.teamMember.firstName ?? "";
+      _lastNameController.text = widget.teamMember.lastName ?? "";
+      _phoneNumberController.text = widget.teamMember.phone ?? "";
+      _emailController.text = widget.teamMember.email ?? "";
+      // authViewModel.selectedAssignedToMachine = Machines(
+      //     id: widget.teamMember.id, machineName: widget.teamMember.machineName);
+      authViewModel.selectedUserRole = authViewModel.roleList
+          .singleWhere((element) => element.id == widget.teamMember.userRole);
+      authViewModel.selectedAssignedToMachine = authViewModel.assignToList
+          .singleWhere((element) =>
+              element.machineName?.toLowerCase().trim() ==
+              widget.teamMember.machineName?.toLowerCase().trim());
     });
   }
 
@@ -61,7 +77,7 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
                 },
                 icon: const Icon(Icons.arrow_back, color: Colors.black)),
             title: Text(
-              "Add Team Member",
+              "Edit Team Member",
               style: GoogleFonts.nunitoSans(
                 color: const Color(0xff212121),
                 fontSize: 20,
@@ -70,6 +86,14 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
             ),
             titleSpacing: 0,
             centerTitle: false,
+            actions: [
+              IconButton(
+                  onPressed: () async {
+                    await authViewModel.deleteTeamMember(
+                        memberId: widget.teamMember.id.toString());
+                  },
+                  icon: SvgPicture.asset("assets/svg/remove-member.svg"))
+            ],
           ),
         ),
       ),
@@ -184,35 +208,6 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
                       return null;
                     },
                     textInputType: TextInputType.phone,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Password",
-                    style: GoogleFonts.nunitoSans(
-                      color: const Color(0xff212121),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  AppTextField(
-                    controller: _passwordController,
-                    obscureText: false,
-                    hintText: 'Password',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter password';
-                      } else if (value.length < 6) {
-                        return 'Password is too short';
-                      }
-                      return null;
-                    },
-                    textInputType: TextInputType.visiblePassword,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(
@@ -345,9 +340,9 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
                           margin: const EdgeInsets.symmetric(vertical: 40),
                           child: AppButton(
                             onTap: () {
-                              _addMember(authViewModel);
+                              _addMember(authViewModel, widget.teamMember);
                             },
-                            title: "Update",
+                            title: "Save",
                           ),
                         )
                       : const SizedBox(),
@@ -360,9 +355,9 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
                       right: 0,
                       child: AppButton(
                         onTap: () {
-                          _addMember(authViewModel);
+                          _addMember(authViewModel, widget.teamMember);
                         },
-                        title: "Add New Member",
+                        title: "Save",
                       ),
                     )
                   : const SizedBox()
@@ -373,7 +368,7 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
     );
   }
 
-  _addMember(AuthViewModel authViewModel) async {
+  _addMember(AuthViewModel authViewModel, TeamMembers teamMember) async {
     if (_formKey.currentState!.validate()) {
       if (authViewModel.selectedUserRole.id == null ||
           authViewModel.selectedUserRole.id == '0') {
@@ -382,12 +377,12 @@ class _AddTeamMemberViewState extends State<AddTeamMemberView> {
           authViewModel.selectedAssignedToMachine.id == '0') {
         Fluttertoast.showToast(msg: 'Please select machine');
       } else {
-        await authViewModel.addTeamMember(
+        await authViewModel.updateTeamMember(
             firstName: _firsNameController.text.trim(),
             lastName: _lastNameController.text.trim(),
             phoneNo: _phoneNumberController.text.trim(),
             email: _emailController.text.trim(),
-            password: _passwordController.text.trim());
+            memberId: teamMember.id.toString());
       }
     } else {
       authViewModel.autoValidateModeAddTeamMember = AutovalidateMode.always;

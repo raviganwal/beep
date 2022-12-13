@@ -1,14 +1,11 @@
-import 'package:assorted_layout_widgets/assorted_layout_widgets.dart';
 import 'package:beep/ui/dashboard/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
 import '../../core/app_locator.dart';
 import '../../core/service/navigation_service.dart';
 import '../../core/viewmodel/auth_view_model.dart';
-import 'machines/add_machine_view.dart';
 import 'profile/my_team/my_team_view.dart';
 
 class ProfileTabView extends StatefulWidget {
@@ -19,6 +16,15 @@ class ProfileTabView extends StatefulWidget {
 }
 
 class _ProfileTabViewState extends State<ProfileTabView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final authViewModel = context.read<AuthViewModel>();
+      authViewModel.profile();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
@@ -68,7 +74,8 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                                 borderRadius: BorderRadius.circular(100.0),
                                 onTap: () async {
                                   await locator<NavigationService>()
-                                      .navigateToWidget(const EditProfileView());
+                                      .navigateToWidget(
+                                          const EditProfileView());
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
@@ -96,23 +103,25 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Randy Arnest",
-                              style: GoogleFonts.nunitoSans(
-                                color: Colors.white,
-                                fontSize: 28,
-                                height: 1.6,
-                                fontWeight: FontWeight.w700,
+                            if (authViewModel.profileModel != null) ...[
+                              Text(
+                                "${authViewModel.profileModel?.accountInfo?.firstName} ${authViewModel.profileModel?.accountInfo?.lastName}",
+                                style: GoogleFonts.nunitoSans(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  height: 1.6,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "Owner",
-                              style: GoogleFonts.nunitoSans(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            )
+                              Text(
+                                "${authViewModel.getUserRole(role: authViewModel.profileModel!.accountInfo!.userRole!)}",
+                                style: GoogleFonts.nunitoSans(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              )
+                            ]
                           ],
                         ),
                       ),
@@ -156,14 +165,15 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                     ),
                     Row(
                       children: [
-                        Text(
-                          "\$ 5,000",
-                          style: GoogleFonts.nunitoSans(
-                            color: const Color(0xff212121),
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
+                        if (authViewModel.profileModel != null)
+                          Text(
+                            "${authViewModel.profileModel?.totalEarnings}",
+                            style: GoogleFonts.nunitoSans(
+                              color: const Color(0xff212121),
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
                         const Spacer(),
                         Material(
                           type: MaterialType.transparency,
@@ -220,8 +230,9 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                     const SizedBox(
                       width: 10,
                     ),
+                    if (authViewModel.profileModel != null)
                     Text(
-                      "example@email.com",
+                      "${authViewModel.profileModel?.accountInfo?.email}",
                       style: GoogleFonts.nunitoSans(
                         color: const Color(0xff212121),
                         fontSize: 17,
@@ -245,8 +256,9 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                     const SizedBox(
                       width: 10,
                     ),
+                    if (authViewModel.profileModel != null)
                     Text(
-                      "+012344567584",
+                      "${authViewModel.profileModel?.accountInfo?.phone}",
                       style: GoogleFonts.nunitoSans(
                         color: const Color(0xff212121),
                         fontSize: 17,
@@ -283,8 +295,9 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                     const SizedBox(
                       width: 10,
                     ),
+                    if (authViewModel.profileModel != null)
                     Text(
-                      "Citi Bank",
+                      "${authViewModel.profileModel?.bankAccount?.bankName}",
                       style: GoogleFonts.nunitoSans(
                         color: const Color(0xff212121),
                         fontSize: 17,
@@ -292,8 +305,9 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                       ),
                     ),
                     const Spacer(),
+                    if (authViewModel.profileModel != null)
                     Text(
-                      "1233 ****",
+                      "${authViewModel.profileModel?.bankAccount?.accountNumber}",
                       textAlign: TextAlign.right,
                       style: GoogleFonts.nunitoSans(
                         color: const Color(0xff898989),
@@ -330,8 +344,9 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                     const SizedBox(
                       width: 10,
                     ),
+                    if (authViewModel.profileModel != null)
                     Text(
-                      "5 Team Member",
+                      "${authViewModel.profileModel?.teamMembers} Team Member",
                       style: GoogleFonts.nunitoSans(
                         color: const Color(0xff212121),
                         fontSize: 17,

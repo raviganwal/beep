@@ -1,11 +1,14 @@
 import 'package:beep/core/app_status.dart';
+import 'package:beep/core/model/machine_stats_model.dart';
 import 'package:beep/core/viewmodel/machine_view_model.dart';
+import 'package:beep/ui/dashboard/machines/monthly_stats_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../widget/utility/no_data_widget.dart';
+import 'daily_stats_view.dart';
 
 class StatsTabView extends StatefulWidget {
   const StatsTabView({Key? key}) : super(key: key);
@@ -14,13 +17,18 @@ class StatsTabView extends StatefulWidget {
   State<StatsTabView> createState() => _StatsTabViewState();
 }
 
-class _StatsTabViewState extends State<StatsTabView> {
+class _StatsTabViewState extends State<StatsTabView>
+    with TickerProviderStateMixin {
+  late TabController _controller;
+
   @override
   void initState() {
     super.initState();
+    _controller = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final machineViewModel = context.read<MachineViewModel>();
       machineViewModel.getMachineDetail();
+      machineViewModel.getMachineStats();
     });
   }
 
@@ -29,10 +37,11 @@ class _StatsTabViewState extends State<StatsTabView> {
     final machineViewModel = context.watch<MachineViewModel>();
     return Scaffold(
       backgroundColor: const Color(0xFFF4F4F4),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, value) {
+          return [
+            SliverToBoxAdapter(
+                child: Container(
               padding: const EdgeInsets.only(
                   left: 24, right: 24, top: 20, bottom: 30),
               color: Colors.white,
@@ -303,62 +312,53 @@ class _StatsTabViewState extends State<StatsTabView> {
                   )
                 ],
               ),
+            )),
+            SliverToBoxAdapter(
+              child: TabBar(
+                controller: _controller,
+                indicatorPadding: const EdgeInsets.symmetric(horizontal: 24),
+                // indicatorWeight: 0,
+                indicator: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xff00ab6c), width: 5.0),
+                  ),
+                ),
+                labelColor: const Color(0xff00ab6c),
+                labelStyle: GoogleFonts.nunitoSans(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelStyle: GoogleFonts.nunitoSans(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelColor: const Color(0xff898989),
+                tabs: const [
+                  Tab(
+                    text: "Daily Stats",
+                  ),
+                  Tab(
+                    text: "Monthly Stats",
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
-            Container(
-              color: Colors.white,
-              child: DefaultTabController(
-                  length: 2, // length of tabs
-                  initialIndex: 0,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Container(
-                          child: TabBar(
-                            indicatorPadding:
-                                const EdgeInsets.symmetric(horizontal: 24),
-                            // indicatorWeight: 0,
-                            indicator: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                    color: Color(0xff00ab6c), width: 5.0),
-                              ),
-                            ),
-                            labelColor: const Color(0xff00ab6c),
-                            labelStyle: GoogleFonts.nunitoSans(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            unselectedLabelStyle: GoogleFonts.nunitoSans(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            unselectedLabelColor: const Color(0xff898989),
-                            tabs: const [
-                              Tab(
-                                text: "Daily Stats",
-                              ),
-                              Tab(
-                                text: "Monthly Stats",
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                            height: 400, //height of TabBarView
-                            decoration: const BoxDecoration(
-                                border: Border(
-                                    top: BorderSide(
-                                        color: Colors.grey, width: 0.5))),
-                            child: const TabBarView(children: <Widget>[
-                              NoDataWidget(),
-                              NoDataWidget(),
-                            ]))
-                      ])),
-            ),
-          ],
+          ];
+        },
+        body: Container(
+          color: Colors.white,
+          child: Container(
+              decoration: const BoxDecoration(
+                  border:
+                      Border(top: BorderSide(color: Colors.grey, width: 0.5))),
+              child: TabBarView(controller: _controller, children: <Widget>[
+                machineViewModel.dailyStatsList.isEmpty
+                    ? const NoDataWidget()
+                    : const DailyStatsView(),
+                machineViewModel.monthlyStatsList.isEmpty
+                    ? const NoDataWidget()
+                    : const MonthlyStatsView(),
+              ])),
         ),
       ),
     );

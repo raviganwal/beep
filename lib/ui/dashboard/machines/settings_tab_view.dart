@@ -42,7 +42,6 @@ class _SettingsTabViewState extends State<SettingsTabView> {
     final authViewModel = context.read<AuthViewModel>();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await authViewModel.getCities();
-      machineViewModel.currentPosition = null;
       machineViewModel.autoValidateModeSettings = AutovalidateMode.disabled;
       _machineNameController.text =
           machineViewModel.selectedMahcine.machineName.toString();
@@ -65,7 +64,11 @@ class _SettingsTabViewState extends State<SettingsTabView> {
               ? true
               : false;
       machineViewModel.enablePublicAccess =
-          machineViewModel.selectedMahcine.isActive == AppStatus.online
+          machineViewModel.selectedMahcine.publicAccess == AppStatus.normal
+              ? true
+              : false;
+      machineViewModel.enableMaintenance =
+          machineViewModel.selectedMahcine.maintenanceMode == AppStatus.abnormal
               ? true
               : false;
       authViewModel.selectedCity = authViewModel.cityList.firstWhere(
@@ -455,6 +458,43 @@ class _SettingsTabViewState extends State<SettingsTabView> {
                               value: machineViewModel.enableLight,
                               onChanged: (value) {
                                 machineViewModel.enableLight = value;
+                              },
+                              activeColor: const Color(0xFF00AB6C),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 1,
+                    color: const Color(0xffeaeaea),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    margin: const EdgeInsets.only(bottom: 20, top: 25),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Maintenance Mode",
+                          style: GoogleFonts.nunitoSans(
+                            color: const Color(0xff212121),
+                            fontSize: 17,
+                            height: 1.52,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        SizedBox(
+                          width: 51,
+                          height: 31,
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: CupertinoSwitch(
+                              value: machineViewModel.enableMaintenance,
+                              onChanged: (value) {
+                                machineViewModel.enableMaintenance = value;
                               },
                               activeColor: const Color(0xFF00AB6C),
                             ),

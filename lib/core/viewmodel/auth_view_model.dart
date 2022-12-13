@@ -1,9 +1,15 @@
 import 'package:beep/core/model/city_model.dart';
+import 'package:beep/core/model/machine_model.dart';
+import 'package:beep/core/model/my_team_machine_model.dart';
+import 'package:beep/core/model/my_team_model.dart';
+import 'package:beep/core/model/profile_model.dart';
+import 'package:beep/core/model/user_role_model.dart';
 import 'package:beep/core/service/api_url.dart';
 import 'package:beep/core/viewmodel/base_view_model.dart';
 import 'package:beep/ui/auth/login_view.dart';
 import 'package:beep/ui/auth/signup_complete.dart';
 import 'package:beep/ui/widget/app_debug_print.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -21,16 +27,55 @@ class AuthViewModel extends BaseViewModel {
   final _sharedPrefService = locator<SharedPrefService>();
   final _navigationService = locator<NavigationService>();
   late Data _selectedCity;
+  late Machines _selectedMachine;
+  late Machines _selectedAssignedToMachine;
+  late UserRoleModel _selectedUserRole;
+  List<UserRoleModel> roleList = [];
   List<Data> cityList = [];
+  List<Machines> myTeamMachineList = [];
+  List<Machines> assignToList = [];
+  List<TeamMembers> myTeamList = [];
   bool _isReferralApplied = false;
   bool _checkTandC = false;
   bool isLoggedIn = false;
+  ProfileModel? profileModel;
+
+  Country _selectedCountryCountry = Country(
+    phoneCode: '1',
+    countryCode: 'US',
+    e164Sc: -1,
+    geographic: false,
+    level: -1,
+    name: 'United States',
+    example: '',
+    displayName: 'World Wide (WW)',
+    displayNameNoCountryCode: 'World Wide',
+    e164Key: '',
+  );
+
+  UserRoleModel get selectedUserRole => _selectedUserRole;
+
+  set selectedUserRole(UserRoleModel value) {
+    _selectedUserRole = value;
+    notifyListeners();
+  }
+
+  Country get selectedCountryCountry => _selectedCountryCountry;
+
+  set selectedCountryCountry(Country value) {
+    _selectedCountryCountry = value;
+    notifyListeners();
+  }
 
   bool get isReferralApplied => _isReferralApplied;
 
   // login
   AutovalidateMode _autoValidateModeLogin = AutovalidateMode.disabled;
   AutovalidateMode _autoValidateModeSignUp = AutovalidateMode.disabled;
+  AutovalidateMode _autoValidateModeEditProfile = AutovalidateMode.disabled;
+  AutovalidateMode _autoValidateModeEditPassword = AutovalidateMode.disabled;
+  AutovalidateMode _autoValidateModeAddTeamMember = AutovalidateMode.disabled;
+
   bool _obscureText1 = true;
   bool _obscureText2 = true;
 
@@ -40,6 +85,20 @@ class AuthViewModel extends BaseViewModel {
 
   set otpCodeInput(String value) {
     _otpCodeInput = value;
+    notifyListeners();
+  }
+
+  Machines get selectedAssignedToMachine => _selectedAssignedToMachine;
+
+  set selectedAssignedToMachine(Machines value) {
+    _selectedAssignedToMachine = value;
+    notifyListeners();
+  }
+
+  Machines get selectedMachine => _selectedMachine;
+
+  set selectedMachine(Machines value) {
+    _selectedMachine = value;
     notifyListeners();
   }
 
@@ -76,6 +135,30 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  AutovalidateMode get autoValidateModeAddTeamMember =>
+      _autoValidateModeAddTeamMember;
+
+  set autoValidateModeAddTeamMember(AutovalidateMode value) {
+    _autoValidateModeAddTeamMember = value;
+    notifyListeners();
+  }
+
+  AutovalidateMode get autoValidateModeEditPassword =>
+      _autoValidateModeEditPassword;
+
+  set autoValidateModeEditPassword(AutovalidateMode value) {
+    _autoValidateModeEditPassword = value;
+    notifyListeners();
+  }
+
+  AutovalidateMode get autoValidateModeEditProfile =>
+      _autoValidateModeEditProfile;
+
+  set autoValidateModeEditProfile(AutovalidateMode value) {
+    _autoValidateModeEditProfile = value;
+    notifyListeners();
+  }
+
   AutovalidateMode get autoValidateModeSignUp => _autoValidateModeSignUp;
 
   set autoValidateModeSignUp(AutovalidateMode value) {
@@ -87,6 +170,17 @@ class AuthViewModel extends BaseViewModel {
 
   set autoValidateModeLogin(value) {
     _autoValidateModeLogin = value;
+    notifyListeners();
+  }
+
+  // 1= operator, 2 = Manager and 3= Technician
+  getRoleList() {
+    roleList.clear();
+    selectedUserRole = UserRoleModel("0", "-Select-");
+    roleList.add(selectedUserRole);
+    roleList.add(UserRoleModel("1", "Operator"));
+    roleList.add(UserRoleModel("2", "Manager"));
+    roleList.add(UserRoleModel("3", "Technician"));
     notifyListeners();
   }
 
@@ -143,9 +237,10 @@ class AuthViewModel extends BaseViewModel {
       "last_name": lName,
       "city_id": cityId,
       "email": email,
-      "phone_no": phoneNumber,
+      "phone_no": '+${selectedCountryCountry.phoneCode}$phoneNumber',
       "password": password
     };
+    appDebugPrint('createAccount params $params');
     final response = await apiService.post(ApiUrl.createAccount, params);
     setStatus(ViewStatus.ready);
     Fluttertoast.showToast(msg: response['msg']);
@@ -251,5 +346,206 @@ class AuthViewModel extends BaseViewModel {
     }
     setStatus(ViewStatus.ready);
     notifyListeners();
+  }
+
+  profile() async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+    };
+    appDebugPrint("profile params $params");
+    final response = await apiService.post(ApiUrl.profile, params);
+    setStatus(ViewStatus.ready);
+    profileModel = ProfileModel.fromJson(response);
+    notifyListeners();
+  }
+
+  updateProfile(
+      {required String firstName,
+      required String lastName,
+      required String email,
+      required String bankName,
+      required String accountNumber,
+      required String accountTile}) async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "first_name": firstName,
+      "last_name": lastName,
+      "email": email,
+      "bank_name": bankName,
+      "account_number": accountNumber,
+      "account_title": accountTile,
+    };
+    appDebugPrint("profile params $params");
+    final response = await apiService.post(ApiUrl.updateProfile, params);
+    setStatus(ViewStatus.ready);
+    Fluttertoast.showToast(msg: response['msg']);
+    profile();
+    notifyListeners();
+  }
+
+  updatePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "old_password": oldPassword,
+      "new_password": newPassword,
+      "confirm_password": confirmPassword,
+    };
+    appDebugPrint("profile params $params");
+    final response = await apiService.post(ApiUrl.updatePassword, params);
+    setStatus(ViewStatus.ready);
+    Fluttertoast.showToast(msg: response['msg']);
+    if (response["code"] == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  getMyTeam({String machineId = "0"}) async {
+    myTeamList.clear();
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "machine_id": machineId
+    };
+    appDebugPrint("getMachineList params $params");
+    final response = await apiService.post(ApiUrl.myTeam, params);
+    setStatus(ViewStatus.ready);
+    if (response["code"] == 200) {
+      MyTeamModel machineTeamModel = MyTeamModel.fromJson(response);
+      myTeamList.addAll(machineTeamModel.teamMembers!);
+    } else {
+      Fluttertoast.showToast(msg: response['msg']);
+    }
+    notifyListeners();
+  }
+
+  getAssignTo({String machineId = "0"}) async {
+    setStatus(ViewStatus.loading);
+    assignToList.clear();
+    selectedAssignedToMachine = Machines(machineName: '-Select-', id: "0");
+    assignToList.add(selectedAssignedToMachine);
+
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "machine_id": machineId
+    };
+    appDebugPrint("getMachineList params $params");
+    final response = await apiService.post(ApiUrl.getMachineOptions, params);
+    setStatus(ViewStatus.ready);
+    if (response["code"] == 200) {
+      MyTeamMachineModel myTeamMachineModel =
+          MyTeamMachineModel.fromJson(response);
+      assignToList.addAll(myTeamMachineModel.machines!);
+    } else {
+      Fluttertoast.showToast(msg: response['msg']);
+    }
+    notifyListeners();
+  }
+
+  getMachineOptions(
+      {String machineId = "0", bool fromAddMemberScreen = false}) async {
+    setStatus(ViewStatus.loading);
+    myTeamMachineList.clear();
+    selectedMachine = Machines(machineName: 'All Member', id: "0");
+    myTeamMachineList.add(selectedMachine);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "machine_id": machineId
+    };
+    appDebugPrint("getMachineList params $params");
+    final response = await apiService.post(ApiUrl.getMachineOptions, params);
+    setStatus(ViewStatus.ready);
+    if (response["code"] == 200) {
+      MyTeamMachineModel myTeamMachineModel =
+          MyTeamMachineModel.fromJson(response);
+      myTeamMachineList.addAll(myTeamMachineModel.machines!);
+    } else {
+      Fluttertoast.showToast(msg: response['msg']);
+    }
+    notifyListeners();
+  }
+
+  addTeamMember(
+      {required String firstName,
+      required String lastName,
+      required phoneNo,
+      required email,
+      required password}) async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "machine_id": selectedAssignedToMachine.id,
+      "first_name": firstName,
+      "last_name": lastName,
+      "phone_no": phoneNo,
+      "email": email,
+      "password": password,
+      "user_role": selectedUserRole.id,
+    };
+    appDebugPrint("getMachineList params $params");
+    final response = await apiService.post(ApiUrl.addTeamMember, params);
+    setStatus(ViewStatus.ready);
+    Fluttertoast.showToast(msg: response['msg']);
+    if (response["code"] == 200) {
+      _navigationService.popAwait(key: 'key', value: true);
+    }
+  }
+
+  updateTeamMember(
+      {required String memberId,
+      required String firstName,
+      required String lastName,
+      required phoneNo,
+      required email}) async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "machine_id": selectedAssignedToMachine.id,
+      "member_id": memberId,
+      "first_name": firstName,
+      "last_name": lastName,
+      "phone_no": phoneNo,
+      "email": email,
+      "user_role": selectedUserRole.id,
+    };
+    appDebugPrint("updateTeamMember params $params");
+    final response = await apiService.post(ApiUrl.updateTeamMember, params);
+    setStatus(ViewStatus.ready);
+    Fluttertoast.showToast(msg: response['msg']);
+    if (response["code"] == 200) {
+      _navigationService.popAwait(key: 'key', value: true);
+    }
+  }
+
+  deleteTeamMember({required String memberId}) async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "member_id": memberId,
+    };
+    appDebugPrint("updateTeamMember params $params");
+    final response = await apiService.post(ApiUrl.deleteTeamMember, params);
+    setStatus(ViewStatus.ready);
+    Fluttertoast.showToast(msg: response['msg']);
+    if (response["code"] == 200) {
+      _navigationService.popAwait(key: 'key', value: true);
+    }
   }
 }

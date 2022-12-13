@@ -1,4 +1,6 @@
+import 'package:beep/core/app_status.dart';
 import 'package:beep/core/model/assigned_model.dart';
+import 'package:beep/core/model/machine_team_model.dart';
 import 'package:beep/core/viewmodel/machine_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -19,7 +21,7 @@ class _AssignedTabViewState extends State<AssignedTabView> {
   void initState() {
     final machineViewModel = context.read<MachineViewModel>();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      machineViewModel.getAssignedList();
+      machineViewModel.getMachineTeam();
     });
     super.initState();
   }
@@ -30,11 +32,11 @@ class _AssignedTabViewState extends State<AssignedTabView> {
     return Scaffold(
         backgroundColor: const Color(0xFFF4F4F4),
         body: ListView.separated(
-          itemCount: machineViewModel.assignedList.length,
+          itemCount: machineViewModel.machineTeamList.length,
           padding: const EdgeInsets.only(left: 24, right: 24, top: 30),
           itemBuilder: (context, index) {
-            AssignedModel model =
-                machineViewModel.assignedList.elementAt(index);
+            TeamMembers model =
+                machineViewModel.machineTeamList.elementAt(index);
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
               decoration: BoxDecoration(
@@ -45,7 +47,7 @@ class _AssignedTabViewState extends State<AssignedTabView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    model.name,
+                    "${model.firstName} ${model.lastName}",
                     style: GoogleFonts.nunitoSans(
                       color: const Color(0xff00ab6c),
                       fontSize: 17,
@@ -56,7 +58,8 @@ class _AssignedTabViewState extends State<AssignedTabView> {
                     height: 5,
                   ),
                   Text(
-                    model.designation,
+                    machineViewModel.getUserRole(
+                        role: model.userRole.toString()),
                     style: GoogleFonts.nunitoSans(
                       color: const Color(0xff898989),
                       fontSize: 15,
@@ -84,7 +87,7 @@ class _AssignedTabViewState extends State<AssignedTabView> {
                         width: 10,
                       ),
                       Text(
-                        model.email,
+                        "${model.email}",
                         style: GoogleFonts.nunitoSans(
                           color: const Color(0xff212121),
                           fontSize: 17,
@@ -108,7 +111,7 @@ class _AssignedTabViewState extends State<AssignedTabView> {
                         width: 10,
                       ),
                       Text(
-                        model.phone,
+                        "${model.phone}",
                         style: GoogleFonts.nunitoSans(
                           color: const Color(0xff212121),
                           fontSize: 17,
