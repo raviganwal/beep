@@ -223,6 +223,8 @@ class MachineViewModel extends BaseViewModel {
   getAllMachine({AuthViewModel? authViewModel}) async {
     machineList.clear();
     attentionsList.clear();
+    filteredAttentionsList.clear();
+    filteredMachineList.clear();
     setStatus(ViewStatus.loading);
     final params = {
       "token": await _sharedPrefService.getStringKey(
@@ -241,6 +243,8 @@ class MachineViewModel extends BaseViewModel {
           attentionsList.add(machine);
         }
       }
+      filteredMachineList = machineList;
+      filteredAttentionsList = attentionsList;
     } else {
       Fluttertoast.showToast(msg: response['msg']);
       if (authViewModel != null) authViewModel.logout();
