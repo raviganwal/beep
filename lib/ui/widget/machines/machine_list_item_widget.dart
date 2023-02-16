@@ -42,7 +42,7 @@ class MachineListItemWidget extends StatelessWidget {
               onTap: onTap,
               child: Container(
                 padding: const EdgeInsets.only(
-                    top: 4, bottom: 21, left: 12, right: 12),
+                    top: 4, bottom: 14, left: 12, right: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,

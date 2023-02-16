@@ -366,295 +366,294 @@ class _IssuesTabViewState extends State<IssuesTabView> {
       enableDrag: true,
       builder: (BuildContext context) {
         final machineViewModel = context.watch<MachineViewModel>();
-        return SafeArea(
-          bottom: true,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                    left: 24,
-                    right: 24),
-                margin: const EdgeInsets.only(top: 30),
-                child: Row(
-                  children: [
-                    Text(
-                      "Report",
-                      style: GoogleFonts.nunitoSans(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+        return SingleChildScrollView(
+          child: AnimatedPadding(
+            padding: MediaQuery.of(context).viewInsets,
+            duration: const Duration(milliseconds: 200),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24),
+                  margin: const EdgeInsets.only(top: 30),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Report",
+                        style: GoogleFonts.nunitoSans(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(Icons.close)),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                    left: 24,
-                    right: 24),
-                child: Text(
-                  "What issue are you facing?",
-                  style: GoogleFonts.nunitoSans(
-                    color: const Color(0xff212121),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                      const Spacer(),
+                      IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(Icons.close)),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              machineViewModel.reportOptionsList.isEmpty
-                  ?  Center(
-                    child: Container(
-                        width: 40,
-                        height: 40,
-                        margin: const EdgeInsets.all(8),
-                        child: const CircularProgressIndicator()),
-                  )
-                  : Flexible(
-                      child: ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: machineViewModel.reportOptionsList.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          ReportOption model = machineViewModel
-                              .reportOptionsList
-                              .elementAt(index);
-                          return Theme(
-                            data: Theme.of(context).copyWith(
-                              unselectedWidgetColor: const Color(0xff00ab6c),
-                              disabledColor: const Color(0xff00ab6c),
-                              toggleableActiveColor: const Color(0xff00ab6c),
-                            ),
-                            child: RadioListTile<ReportOption>(
-                              title: Text(
-                                model.issue.toString(),
-                                style: GoogleFonts.nunitoSans(
-                                  color: Colors.black,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24),
+                  child: Text(
+                    "What issue are you facing?",
+                    style: GoogleFonts.nunitoSans(
+                      color: const Color(0xff212121),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                machineViewModel.reportOptionsList.isEmpty
+                    ? Center(
+                        child: Container(
+                            width: 40,
+                            height: 40,
+                            margin: const EdgeInsets.all(8),
+                            child: const CircularProgressIndicator()),
+                      )
+                    : ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: machineViewModel.reportOptionsList.length,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        ReportOption model = machineViewModel
+                            .reportOptionsList
+                            .elementAt(index);
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            unselectedWidgetColor: const Color(0xff00ab6c),
+                            disabledColor: const Color(0xff00ab6c),
+                            toggleableActiveColor: const Color(0xff00ab6c),
+                          ),
+                          child: RadioListTile<ReportOption>(
+                            title: Text(
+                              model.issue.toString(),
+                              style: GoogleFonts.nunitoSans(
+                                color: Colors.black,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
                               ),
-                              value: model,
-                              groupValue: machineViewModel.selectedReportOption,
-                              onChanged: (ReportOption? value) {
-                                machineViewModel.selectedReportOption = value!;
-                              },
                             ),
-                          );
-                        },
-                      ),
-                    ),
-              const SizedBox(
-                height: 30,
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                    left: 24,
-                    right: 24),
-                child: Text(
-                  "Attach Photo",
-                  style: GoogleFonts.nunitoSans(
-                    color: const Color(0xff212121),
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 24, right: 24),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xffeaeaea),
-                    width: 1,
-                  ),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 16),
-                      child: SvgPicture.asset("assets/svg/photo_icon.svg"),
-                    ),
-                    Expanded(
-                        child: Text(
-                      machineViewModel.pickedFile != null
-                          ? machineViewModel.pickedFile!.path.split('/').last
-                          : "",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    )),
-                    InkWell(
-                      onTap: () async {
-                        XFile? pickedFile = await showModalBottomSheet<XFile>(
-                            context: context,
-                            backgroundColor: Colors.transparent,
-                            builder: (BuildContext context) {
-                              return const OnPickImageDialog();
-                            });
-                        if (pickedFile != null) {
-                          machineViewModel.pickedFile = pickedFile!;
-                        }
+                            value: model,
+                            groupValue: machineViewModel.selectedReportOption,
+                            onChanged: (ReportOption? value) {
+                              machineViewModel.selectedReportOption = value!;
+                            },
+                          ),
+                        );
                       },
-                      child: Padding(
+                    ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24),
+                  child: Text(
+                    "Attach Photo",
+                    style: GoogleFonts.nunitoSans(
+                      color: const Color(0xff212121),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  margin: const EdgeInsets.only(left: 24, right: 24),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xffeaeaea),
+                      width: 1,
+                    ),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24.0, vertical: 16),
-                        child: SizedBox(
-                          width: 87,
+                        child: SvgPicture.asset("assets/svg/photo_icon.svg"),
+                      ),
+                      Expanded(
                           child: Text(
-                            "Upload",
-                            textAlign: TextAlign.right,
-                            style: GoogleFonts.nunitoSans(
-                              color: const Color(0xff00ab6c),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
+                        machineViewModel.pickedFile != null
+                            ? machineViewModel.pickedFile!.path.split('/').last
+                            : "",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )),
+                      InkWell(
+                        onTap: () async {
+                          XFile? pickedFile = await showModalBottomSheet<XFile>(
+                              context: context,
+                              backgroundColor: Colors.transparent,
+                              builder: (BuildContext context) {
+                                return const OnPickImageDialog();
+                              });
+                          if (pickedFile != null) {
+                            machineViewModel.pickedFile = pickedFile!;
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0, vertical: 16),
+                          child: SizedBox(
+                            width: 87,
+                            child: Text(
+                              "Upload",
+                              textAlign: TextAlign.right,
+                              style: GoogleFonts.nunitoSans(
+                                color: const Color(0xff00ab6c),
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                    left: 24,
-                    right: 24),
-                child: Text(
-                  "Write a Comment",
-                  style: GoogleFonts.nunitoSans(
-                    color: const Color(0xff212121),
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                      )
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                    left: 24,
-                    right: 24),
-                child: AppTextField(
-                  controller: _commentController,
-                  hintText: "",
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Write a comment';
-                    }
-                    return null;
-                  },
-                  textInputType: TextInputType.text,
-                  textAlign: TextAlign.center,
-                  maxLines: 6,
+                const SizedBox(
+                  height: 30,
                 ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Container(
-                padding: const EdgeInsets.only(left: 24, right: 24),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24),
+                  child: Text(
+                    "Write a Comment",
+                    style: GoogleFonts.nunitoSans(
+                      color: const Color(0xff212121),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24),
+                  child: AppTextField(
+                    controller: _commentController,
+                    hintText: "",
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Write a comment';
+                      }
+                      return null;
+                    },
+                    textInputType: TextInputType.text,
+                    textAlign: TextAlign.center,
+                    maxLines: 6,
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                SafeArea(
+                  bottom: true,
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 24, right: 24),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(0xffeaeaea),
-                              width: 1,
-                            ),
-                            color: Colors.white,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Cancel",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.nunitoSans(
-                              color: const Color(0xff00ab6c),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                        child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: machineViewModel.status != ViewStatus.loading
-                          ? () async {
-                              await machineViewModel.submitReport(
-                                  comment: _commentController.text);
-                              _commentController.clear();
-                              machineViewModel.pickedFile = null;
-                              if (!mounted) return;
+                            onTap: () {
                               Navigator.of(context).pop();
-                              await machineViewModel.getIssues();
-                            }
-                          : null,
-                      child: Container(
-                        height: 56,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: const Color(0xff00ab6c),
-                        ),
-                        alignment: Alignment.center,
-                        child: machineViewModel.status == ViewStatus.loading
-                            ? const CircularProgressIndicator(
+                            },
+                            child: Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xffeaeaea),
+                                  width: 1,
+                                ),
                                 color: Colors.white,
-                              )
-                            : Text(
-                                "Submit",
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                "Cancel",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.nunitoSans(
-                                  color: Colors.white,
+                                  color: const Color(0xff00ab6c),
                                   fontSize: 17,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                      ),
-                    ))
-                  ],
-                ),
-              )
-            ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Expanded(
+                            child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: machineViewModel.status != ViewStatus.loading
+                              ? () async {
+                                  await machineViewModel.submitReport(
+                                      comment: _commentController.text);
+                                  _commentController.clear();
+                                  machineViewModel.pickedFile = null;
+                                  if (!mounted) return;
+                                  Navigator.of(context).pop();
+                                  await machineViewModel.getIssues();
+                                }
+                              : null,
+                          child: Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: const Color(0xff00ab6c),
+                            ),
+                            alignment: Alignment.center,
+                            child: machineViewModel.status == ViewStatus.loading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    "Submit",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.nunitoSans(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                          ),
+                        ))
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         );
       },

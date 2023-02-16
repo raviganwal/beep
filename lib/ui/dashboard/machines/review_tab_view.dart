@@ -41,6 +41,18 @@ class _ReviewTabViewState extends State<ReviewTabView> {
         ),
       ));
     }
+    int greyStars = 5 - list.length;
+    for (int i = 0; i < greyStars; i++) {
+      list.add(Container(
+        margin: const EdgeInsets.only(right: 12),
+        child: SvgPicture.asset(
+          'assets/svg/star.svg',
+          width: 19,
+          height: 19,
+          color: Colors.grey.shade300,
+        ),
+      ));
+    }
     return list;
   }
 
@@ -51,7 +63,6 @@ class _ReviewTabViewState extends State<ReviewTabView> {
     for (int i = 0; i < remarksArr.length; i++) {
       list.add(
         Container(
-          margin: const EdgeInsets.only(right: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color: const Color(0xffe7faf3),
@@ -181,8 +192,11 @@ class _ReviewTabViewState extends State<ReviewTabView> {
                       const SizedBox(
                         height: 20,
                       ),
-                      Row(
+                      Wrap(
+                        direction: Axis.horizontal,
                         children: _chipWidget(review.remarks),
+                        runSpacing: 8,
+                        spacing: 8,
                       ),
                       const SizedBox(
                         height: 20,

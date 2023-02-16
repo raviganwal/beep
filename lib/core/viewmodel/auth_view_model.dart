@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:beep/core/model/bank_account_details_model.dart';
 import 'package:beep/core/model/city_model.dart';
+import 'package:beep/core/model/complete_profile_model.dart';
+import 'package:beep/core/model/earnings_model.dart';
 import 'package:beep/core/model/machine_model.dart';
 import 'package:beep/core/model/my_team_machine_model.dart';
 import 'package:beep/core/model/my_team_model.dart';
@@ -8,6 +14,7 @@ import 'package:beep/core/service/api_url.dart';
 import 'package:beep/core/viewmodel/base_view_model.dart';
 import 'package:beep/ui/auth/login_view.dart';
 import 'package:beep/ui/auth/signup_complete.dart';
+import 'package:beep/ui/dashboard/profile/earnings/withdrawal_thank_you_view.dart';
 import 'package:beep/ui/widget/app_debug_print.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:dio/dio.dart';
@@ -39,7 +46,16 @@ class AuthViewModel extends BaseViewModel {
   bool _checkTandC = false;
   bool isLoggedIn = false;
   ProfileModel? profileModel;
+  CompleteProfileModel? completeProfileModel;
 
+  EarningsModel? earningsModel;
+  List<PaymentHistory> paymentHistoryList = [];
+
+  List<String> accountTypeList = <String>['company', 'individual'];
+
+  String? _selectedAccountType;
+
+  String? referralCode;
   Country _selectedCountryCountry = Country(
     phoneCode: '1',
     countryCode: 'US',
@@ -52,6 +68,24 @@ class AuthViewModel extends BaseViewModel {
     displayNameNoCountryCode: 'World Wide',
     e164Key: '',
   );
+
+  String get selectedAccountType =>
+      _selectedAccountType ?? accountTypeList.first;
+
+  set selectedAccountType(String value) {
+    _selectedAccountType = value;
+    notifyListeners();
+  }
+
+  BankAccountDetailsModel? _bankAccountDetailsModel;
+
+  BankAccountDetailsModel? get bankAccountDetailsModel =>
+      _bankAccountDetailsModel;
+
+  set bankAccountDetailsModel(BankAccountDetailsModel? value) {
+    _bankAccountDetailsModel = value;
+    notifyListeners();
+  }
 
   UserRoleModel get selectedUserRole => _selectedUserRole;
 
@@ -73,6 +107,7 @@ class AuthViewModel extends BaseViewModel {
   AutovalidateMode _autoValidateModeLogin = AutovalidateMode.disabled;
   AutovalidateMode _autoValidateModeSignUp = AutovalidateMode.disabled;
   AutovalidateMode _autoValidateModeEditProfile = AutovalidateMode.disabled;
+  AutovalidateMode _autoValidateModeBankAccount = AutovalidateMode.disabled;
   AutovalidateMode _autoValidateModeEditPassword = AutovalidateMode.disabled;
   AutovalidateMode _autoValidateModeAddTeamMember = AutovalidateMode.disabled;
 
@@ -170,6 +205,14 @@ class AuthViewModel extends BaseViewModel {
 
   set autoValidateModeLogin(value) {
     _autoValidateModeLogin = value;
+    notifyListeners();
+  }
+
+  AutovalidateMode get autoValidateModeBankAccount =>
+      _autoValidateModeBankAccount;
+
+  set autoValidateModeBankAccount(AutovalidateMode value) {
+    _autoValidateModeBankAccount = value;
     notifyListeners();
   }
 
@@ -302,6 +345,21 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  getReferralCode() async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+    };
+    appDebugPrint("getReferralCode params $params");
+    final response = await apiService.post(ApiUrl.getReferralCode, params);
+    setStatus(ViewStatus.ready);
+    if (response["code"] == 200) {
+      referralCode = response['referral_code'];
+    }
+    notifyListeners();
+  }
+
   submitSignup() async {
     setStatus(ViewStatus.loading);
     final params = {
@@ -361,13 +419,40 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  updateProfile(
-      {required String firstName,
-      required String lastName,
-      required String email,
-      required String bankName,
-      required String accountNumber,
-      required String accountTile}) async {
+  getEarnings() async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+    };
+    appDebugPrint("profile params $params");
+    final response = await apiService.post(ApiUrl.paymentHistory, params);
+    setStatus(ViewStatus.ready);
+    earningsModel = EarningsModel.fromJson(response);
+    if (earningsModel != null &&
+        earningsModel?.paymentHistory != null &&
+        earningsModel!.paymentHistory!.isNotEmpty) {
+      paymentHistoryList = earningsModel!.paymentHistory!;
+    }
+    log("response ${jsonEncode(response)}");
+    notifyListeners();
+  }
+
+  filterPaymentHistory({required String machineName}) {
+    List<PaymentHistory> list = paymentHistoryList
+        .where((element) => element.machine == machineName)
+        .toList();
+    return list;
+  }
+
+  updateProfile({
+    required String firstName,
+    required String lastName,
+    required String email,
+    // required String bankName,
+    // required String accountNumber,
+    // required String accountTile
+  }) async {
     setStatus(ViewStatus.loading);
     final params = {
       "token": await _sharedPrefService.getStringKey(
@@ -375,9 +460,9 @@ class AuthViewModel extends BaseViewModel {
       "first_name": firstName,
       "last_name": lastName,
       "email": email,
-      "bank_name": bankName,
-      "account_number": accountNumber,
-      "account_title": accountTile,
+      // "bank_name": bankName,
+      // "account_number": accountNumber,
+      // "account_title": accountTile,
     };
     appDebugPrint("profile params $params");
     final response = await apiService.post(ApiUrl.updateProfile, params);
@@ -385,6 +470,75 @@ class AuthViewModel extends BaseViewModel {
     Fluttertoast.showToast(msg: response['msg']);
     profile();
     notifyListeners();
+  }
+
+  getBankAccountDetails() async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+    };
+    appDebugPrint("getBankAccountDetails params $params");
+    final response =
+        await apiService.post(ApiUrl.getBankAccountDetails, params);
+    appDebugPrint("getBankAccountDetails response ${jsonEncode(response)}");
+    if (response["code"] == 200) {
+      bankAccountDetailsModel =
+          BankAccountDetailsModel.fromJson(response['data']);
+    }
+    setStatus(ViewStatus.ready);
+  }
+
+  addBankAmount(
+      {required String bankName,
+      required String accountNumber,
+      required String routingNumber,
+      required String accountTile}) async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "account_holder_name": accountTile,
+      "account_holder_type": selectedAccountType,
+      "bank_name": bankName,
+      "account_number": accountNumber,
+      "routing_number": routingNumber,
+    };
+    // {
+    //   "token": "a355bb8a9b0be12f118f4e1ce995b33a",
+    // "account_holder_name": "WaAmjad",
+    // "account_holder_type": "individual",
+    // "bank_name": "STRIPE. TEST-BANK",
+    // "account_number": "000123456789",
+    // "routing_number": "11ggecece"
+    // }
+    appDebugPrint("profile params $params");
+    final response = await apiService.post(ApiUrl.addBankAmount, params);
+    setStatus(ViewStatus.ready);
+    appDebugPrint("response $response");
+    Fluttertoast.showToast(msg: response['msg']);
+    if (response["code"] == 200) {
+      completeProfileModel = CompleteProfileModel.fromJson(response);
+      getBankAccountDetails();
+      profile();
+    }
+    notifyListeners();
+  }
+
+  withdraw({required String amount}) async {
+    setStatus(ViewStatus.loading);
+    final params = {
+      "token": await _sharedPrefService.getStringKey(
+          key: SharedPrefService.token, defValue: ""),
+      "amount": amount,
+    };
+    appDebugPrint("profile params $params");
+    final response = await apiService.post(ApiUrl.withdraw, params);
+    setStatus(ViewStatus.ready);
+    Fluttertoast.showToast(msg: response['msg']);
+    _navigationService.pop();
+    _navigationService.navigateToWidget(const WithdrawalThankYouView());
+    profile();
   }
 
   updatePassword({

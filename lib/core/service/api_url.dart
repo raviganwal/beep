@@ -25,7 +25,10 @@ class ApiUrl {
   static const String searchBeepSchool = "${apiUrl}search_beep_school";
   static const String getMachineTeam = "${apiUrl}get_machine_team";
   static const String profile = "${apiUrl}profile";
+  static const String paymentHistory = "${apiUrl}payment_history";
   static const String updateProfile = "${apiUrl}update_profile";
+  static const String addBankAmount = "${apiUrl}add_bank_amount";
+  static const String withdraw = "${apiUrl}withdraw";
   static const String updatePassword = "${apiUrl}update_password";
   static const String myTeam = "${apiUrl}my_team";
   static const String getMachineOptions = "${apiUrl}get_machine_options";
@@ -34,4 +37,6 @@ class ApiUrl {
   static const String deleteTeamMember = "${apiUrl}delete_team_member";
   static const String getReportOptions = "${apiUrl}get_report_options";
   static const String submitReport = "${apiUrl}submit_report";
+  static const String getBankAccountDetails = "${apiUrl}get_bank_account_details";
+  static const String getReferralCode = "${apiUrl}referral_code";
 }

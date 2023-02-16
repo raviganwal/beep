@@ -5,6 +5,8 @@ extension DateToStringFormatExtension on DateTime {
 
   String get toEEEMMMdd => DateFormat("EEE, MMM dd").format(this.toLocal());
 
+  String get toEEEMMMddhhmma => DateFormat("EEE, MMM dd | h:mm a").format(this.toLocal());
+
   String get toMMMDddyyyyhhmma =>
       DateFormat("MMM dd, yyyy - h:mm a").format(this.toLocal());
 

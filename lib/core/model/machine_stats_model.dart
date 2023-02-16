@@ -37,7 +37,7 @@ class MachineStatsModel {
 
 class DailyStats {
   String? washes;
-  int? minutes;
+  String? minutes;
   String? rating;
   String? revenue;
   String? statDate;
@@ -66,7 +66,7 @@ class DailyStats {
 
 class MonthlyStats {
   String? washes;
-  int? minutes;
+  String? minutes;
   String? rating;
   String? revenue;
   String? statMonth;

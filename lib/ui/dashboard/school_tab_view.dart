@@ -68,7 +68,7 @@ class _SchoolTabViewState extends State<SchoolTabView> {
                   width: 4,
                 ),
                 Text(
-                  "Control",
+                  "School",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunitoSans(
                     color: const Color(0xff242d29),

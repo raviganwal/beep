@@ -35,6 +35,7 @@ class _StatsTabViewState extends State<StatsTabView>
   @override
   Widget build(BuildContext context) {
     final machineViewModel = context.watch<MachineViewModel>();
+    debugPrint("selectedMahcine ${machineViewModel.selectedMahcine.toJson()}");
     return Scaffold(
       backgroundColor: const Color(0xFFF4F4F4),
       body: NestedScrollView(
@@ -197,7 +198,11 @@ class _StatsTabViewState extends State<StatsTabView>
                               ),
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                width: 130,
+                                width: machineViewModel
+                                            .selectedMahcine.waterTank ==
+                                        AppStatus.waterNormal
+                                    ? 122
+                                    : 22,
                                 height: 12,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3),
@@ -265,7 +270,11 @@ class _StatsTabViewState extends State<StatsTabView>
                               ),
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                width: 130,
+                                width: machineViewModel
+                                            .selectedMahcine.waterTank ==
+                                        AppStatus.waterNormal
+                                    ? 122
+                                    : 22,
                                 height: 12,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(3),

@@ -1,10 +1,15 @@
 import 'package:beep/core/app_validators.dart';
 import 'package:beep/core/viewmodel/auth_view_model.dart';
 import 'package:beep/ui/dashboard/profile/update_password_view.dart';
+import 'package:beep/ui/widget/button/app_button.dart';
+import 'package:beep/ui/widget/button/white_app_button.dart';
 import 'package:beep/ui/widget/textfield/app_text_field.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/app_locator.dart';
 import '../../../core/service/navigation_service.dart';
@@ -18,11 +23,13 @@ class EditProfileView extends StatefulWidget {
 
 class _EditProfileViewState extends State<EditProfileView> {
   final _formKey = GlobalKey<FormState>();
+  final _formBankKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _routingNumberController = TextEditingController();
   final _bankNameController = TextEditingController();
   final _accountNumberController = TextEditingController();
   final _accountNameController = TextEditingController();
@@ -30,8 +37,10 @@ class _EditProfileViewState extends State<EditProfileView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      FocusScope.of(context).requestFocus(FocusNode());
       final authViewModel = context.read<AuthViewModel>();
+      await authViewModel.getBankAccountDetails();
       if (authViewModel.profileModel != null) {
         _firstNameController.text =
             authViewModel.profileModel!.accountInfo!.firstName!;
@@ -39,13 +48,18 @@ class _EditProfileViewState extends State<EditProfileView> {
             authViewModel.profileModel!.accountInfo!.lastName!;
         _emailController.text = authViewModel.profileModel!.accountInfo!.email!;
         _phoneController.text = authViewModel.profileModel!.accountInfo!.phone!;
-        _bankNameController.text =
-            authViewModel.profileModel!.bankAccount!.bankName!;
-        _accountNumberController.text =
-            authViewModel.profileModel!.bankAccount!.accountNumber!;
-        _accountNameController.text =
-            authViewModel.profileModel!.bankAccount!.accountTitle!;
         authViewModel.autoValidateModeEditProfile = AutovalidateMode.disabled;
+        authViewModel.autoValidateModeBankAccount = AutovalidateMode.disabled;
+      }
+      if (authViewModel.bankAccountDetailsModel != null) {
+        _bankNameController.text =
+            authViewModel.bankAccountDetailsModel?.bankName ?? "";
+        _accountNumberController.text =
+            authViewModel.bankAccountDetailsModel?.accountNumber ?? "";
+        _accountNameController.text =
+            authViewModel.bankAccountDetailsModel?.accountHolderName ?? "";
+        _routingNumberController.text =
+            authViewModel.bankAccountDetailsModel?.routingNumber ?? "";
       }
     });
   }
@@ -83,47 +97,16 @@ class _EditProfileViewState extends State<EditProfileView> {
             ),
             titleSpacing: 0,
             centerTitle: false,
-            actions: [
-              InkWell(
-                onTap: () {
-                  if (_formKey.currentState!.validate()) {
-                    authViewModel.updateProfile(
-                        firstName: _firstNameController.text.trim(),
-                        lastName: _lastNameController.text.trim(),
-                        email: _emailController.text.trim(),
-                        bankName: _bankNameController.text.trim(),
-                        accountNumber: _accountNumberController.text.trim(),
-                        accountTile: _accountNameController.text.trim());
-                  } else {
-                    authViewModel.autoValidateModeEditProfile =
-                        AutovalidateMode.always;
-                  }
-                },
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text(
-                      "Save",
-                      textAlign: TextAlign.right,
-                      style: GoogleFonts.nunitoSans(
-                        color: const Color(0xff00ab6c),
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            ],
+            actions: [],
           ),
         ),
       ),
-      body: Form(
-        key: _formKey,
-        autovalidateMode: authViewModel.autoValidateModeEditProfile,
-        child: ListView(
-          children: [
-            Container(
+      body: ListView(
+        children: [
+          Form(
+            key: _formKey,
+            autovalidateMode: authViewModel.autoValidateModeEditProfile,
+            child: Container(
               margin: const EdgeInsets.only(bottom: 20, top: 30),
               padding: const EdgeInsets.only(
                   left: 24, right: 24, top: 17, bottom: 30),
@@ -290,10 +273,34 @@ class _EditProfileViewState extends State<EditProfileView> {
                       ),
                     ),
                   ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  AppButton(
+                      onTap: () {
+                        if (_formKey.currentState!.validate()) {
+                          authViewModel.updateProfile(
+                            firstName: _firstNameController.text.trim(),
+                            lastName: _lastNameController.text.trim(),
+                            email: _emailController.text.trim(),
+                            // bankName: _bankNameController.text.trim(),
+                            // accountNumber: _accountNumberController.text.trim(),
+                            // accountTile: _accountNameController.text.trim()
+                          );
+                        } else {
+                          authViewModel.autoValidateModeEditProfile =
+                              AutovalidateMode.always;
+                        }
+                      },
+                      title: 'Save'),
                 ],
               ),
             ),
-            Container(
+          ),
+          Form(
+            key: _formBankKey,
+            autovalidateMode: authViewModel.autoValidateModeBankAccount,
+            child: Container(
               padding: const EdgeInsets.only(
                   left: 24, right: 24, top: 17, bottom: 23),
               color: Colors.white,
@@ -387,11 +394,133 @@ class _EditProfileViewState extends State<EditProfileView> {
                     textInputType: TextInputType.text,
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Routing Number",
+                    style: GoogleFonts.nunitoSans(
+                      color: const Color(0xff212121),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  AppTextField(
+                    controller: _routingNumberController,
+                    hintText: '',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter routing number';
+                      }
+                      return null;
+                    },
+                    textInputType: TextInputType.text,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Account Name",
+                    style: GoogleFonts.nunitoSans(
+                      color: const Color(0xff212121),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      icon: SvgPicture.asset('assets/svg/arrow-down-icon.svg'),
+                      elevation: 16,
+                      value: authViewModel.selectedAccountType,
+                      onChanged: (String? value) {
+                        // This is called when the user selects an item.
+                        setState(() {
+                          authViewModel.selectedAccountType = value!;
+                        });
+                      },
+                      items: authViewModel.accountTypeList
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value.toUpperCase(),
+                            style: GoogleFonts.nunitoSans(
+                              color: const Color(0xff212121),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  authViewModel.completeProfileModel != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(bottom: 30),
+                          child: RichText(
+                            text: TextSpan(
+                              text:
+                                  "${authViewModel.completeProfileModel?.msg} " ??
+                                      "",
+                              style:
+                                  GoogleFonts.nunitoSans(color: Colors.black87),
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text:
+                                      '${authViewModel.completeProfileModel?.completeProfileLink}',
+                                  style: GoogleFonts.nunitoSans(
+                                      color: Colors.blue.shade700,
+                                      decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      Uri uri = Uri.parse(authViewModel
+                                              .completeProfileModel
+                                              ?.completeProfileLink ??
+                                          "");
+                                      if (!await launchUrl(
+                                        uri,
+                                        mode: LaunchMode.externalApplication,
+                                      )) {
+                                        throw 'Could not launch $uri';
+                                      }
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : SizedBox(),
+                  // Text(
+                  //         "${authViewModel.completeProfileModel?.completeProfileLink}")
+                  AppButton(
+                      onTap: () {
+                        if (_formBankKey.currentState!.validate()) {
+                          authViewModel.addBankAmount(
+                              bankName: _bankNameController.text.trim(),
+                              routingNumber:
+                                  _routingNumberController.text.trim(),
+                              accountNumber:
+                                  _accountNumberController.text.trim(),
+                              accountTile: _accountNameController.text.trim());
+                        } else {
+                          authViewModel.autoValidateModeBankAccount =
+                              AutovalidateMode.always;
+                        }
+                      },
+                      title: 'Save'),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

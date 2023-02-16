@@ -294,11 +294,63 @@ class _SettingsTabViewState extends State<SettingsTabView> {
                   const SizedBox(
                     height: 20,
                   ),
-                  WhiteAppButton(
-                      onTap: () {
-                        _getCurrentPosition(machineViewModel);
-                      },
-                      title: "Get Current Location"),
+                  // WhiteAppButton(
+                  //     onTap: () {
+                  //       _getCurrentPosition(machineViewModel);
+                  //     },
+                  //     title: "Get Current Location"),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xffeaeaea),
+                        width: 1,
+                      ),
+                      color: Colors.white,
+                    ),
+                    alignment: Alignment.center,
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: InkWell(
+                        onTap: () {
+                          _getCurrentPosition(machineViewModel);
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          height: 70,
+                          width: MediaQuery.of(context).size.width,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          alignment: Alignment.center,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Get Current Location",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.nunitoSans(
+                                  color: const Color(0xff00ab6c),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Text(
+                                "Only press when you are next to your machine to get the exact machine location",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.nunitoSans(
+                                  color: const Color(0xff00ab6c),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   if (machineViewModel.currentPosition != null) ...[
                     const SizedBox(
                       height: 8,
@@ -553,11 +605,13 @@ class _SettingsTabViewState extends State<SettingsTabView> {
                   // machineViewModel.saveMachineSettings();
                   if (authViewModel.selectedCity.id == null) {
                     Fluttertoast.showToast(msg: 'Please select your city');
-                  } else if (machineViewModel.currentPosition == null) {
-                    Fluttertoast.showToast(
-                        msg:
-                            "Please tap Get Current Location to fetch current location.");
-                  } else if (_formKey.currentState!.validate()) {
+                  }
+                  // else if (machineViewModel.currentPosition == null) {
+                  //   Fluttertoast.showToast(
+                  //       msg:
+                  //           "Please tap Get Current Location to fetch current location.");
+                  // }
+                  else if (_formKey.currentState!.validate()) {
                     machineViewModel.saveMachineSettings(
                         machineName: _machineNameController.text,
                         address: _addressController.text,

@@ -146,15 +146,18 @@ class _AddMachineViewState extends State<AddMachineView> {
     setState(() {
       this.controller = controller;
     });
-    controller.scannedDataStream.listen((scanData) {
-      if ( result == null || scanData.code != result?.code) {
+    controller.scannedDataStream.listen((scanData) async {
+      if (result == null || scanData.code != result?.code) {
         setState(() {
           result = scanData;
         });
         appDebugPrint(
             'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}');
         final machineViewModel = context.read<MachineViewModel>();
-        machineViewModel.addMachine(qrCode: "${result?.code}");
+        await machineViewModel.addMachine(qrCode: "${result?.code}");
+        if (machineViewModel.isMachineAdded) {
+          inputCodeModal();
+        }
       }
     });
   }

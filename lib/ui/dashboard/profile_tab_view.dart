@@ -1,8 +1,11 @@
+import 'package:beep/ui/dashboard/profile/earnings/earnings_view.dart';
+import 'package:beep/ui/dashboard/profile/earnings/withdrawal_thank_you_view.dart';
 import 'package:beep/ui/dashboard/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../core/app_locator.dart';
 import '../../core/service/navigation_service.dart';
 import '../../core/viewmodel/auth_view_model.dart';
@@ -22,6 +25,7 @@ class _ProfileTabViewState extends State<ProfileTabView> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final authViewModel = context.read<AuthViewModel>();
       authViewModel.profile();
+      authViewModel.getBankAccountDetails();
     });
   }
 
@@ -179,7 +183,10 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                           type: MaterialType.transparency,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(4.0),
-                            onTap: () {},
+                            onTap: () async {
+                              await locator<NavigationService>()
+                                  .navigateToWidget(const EarningsView());
+                            },
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
@@ -231,14 +238,14 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                       width: 10,
                     ),
                     if (authViewModel.profileModel != null)
-                    Text(
-                      "${authViewModel.profileModel?.accountInfo?.email}",
-                      style: GoogleFonts.nunitoSans(
-                        color: const Color(0xff212121),
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
+                      Text(
+                        "${authViewModel.profileModel?.accountInfo?.email}",
+                        style: GoogleFonts.nunitoSans(
+                          color: const Color(0xff212121),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
                   ],
                 ),
               ),
@@ -257,14 +264,14 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                       width: 10,
                     ),
                     if (authViewModel.profileModel != null)
-                    Text(
-                      "${authViewModel.profileModel?.accountInfo?.phone}",
-                      style: GoogleFonts.nunitoSans(
-                        color: const Color(0xff212121),
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
+                      Text(
+                        "${authViewModel.profileModel?.accountInfo?.phone}",
+                        style: GoogleFonts.nunitoSans(
+                          color: const Color(0xff212121),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
                   ],
                 ),
               ),
@@ -286,36 +293,44 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                margin: const EdgeInsets.only(bottom: 21, top: 15),
-                child: Row(
-                  children: [
-                    SvgPicture.asset('assets/svg/bank-icon.svg'),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    if (authViewModel.profileModel != null)
-                    Text(
-                      "${authViewModel.profileModel?.bankAccount?.bankName}",
-                      style: GoogleFonts.nunitoSans(
-                        color: const Color(0xff212121),
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
+              InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () async {
+                  await locator<NavigationService>()
+                      .navigateToWidget(const EditProfileView());
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  margin: const EdgeInsets.only(bottom: 21, top: 15),
+                  child: Row(
+                    children: [
+                      SvgPicture.asset('assets/svg/bank-icon.svg'),
+                      const SizedBox(
+                        width: 10,
                       ),
-                    ),
-                    const Spacer(),
-                    if (authViewModel.profileModel != null)
-                    Text(
-                      "${authViewModel.profileModel?.bankAccount?.accountNumber}",
-                      textAlign: TextAlign.right,
-                      style: GoogleFonts.nunitoSans(
-                        color: const Color(0xff898989),
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
-                  ],
+                      if (authViewModel.profileModel != null)
+                        Text(
+                          authViewModel.bankAccountDetailsModel?.bankName ?? '',
+                          style: GoogleFonts.nunitoSans(
+                            color: const Color(0xff212121),
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      const Spacer(),
+                      if (authViewModel.profileModel != null)
+                        Text(
+                          "${authViewModel.bankAccountDetailsModel?.accountNumber?.substring(0, 4) ?? ''}****",
+                          textAlign: TextAlign.right,
+                          style: GoogleFonts.nunitoSans(
+                            color: const Color(0xff898989),
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -345,14 +360,14 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                       width: 10,
                     ),
                     if (authViewModel.profileModel != null)
-                    Text(
-                      "${authViewModel.profileModel?.teamMembers} Team Member",
-                      style: GoogleFonts.nunitoSans(
-                        color: const Color(0xff212121),
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
+                      Text(
+                        "${authViewModel.profileModel?.teamMembers} Team Member",
+                        style: GoogleFonts.nunitoSans(
+                          color: const Color(0xff212121),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
                     const Spacer(),
                     InkWell(
                       borderRadius: BorderRadius.circular(4.0),
@@ -405,7 +420,9 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                   type: MaterialType.transparency,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12.0),
-                    onTap: () {},
+                    onTap: () {
+                      authViewModel.selectedTabIndex = 2;
+                    },
                     child: Container(
                       height: 55,
                       padding: const EdgeInsets.all(15),

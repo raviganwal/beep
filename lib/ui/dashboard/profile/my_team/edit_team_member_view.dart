@@ -97,262 +97,249 @@ class _EditTeamMemberViewState extends State<EditTeamMemberView> {
           ),
         ),
       ),
-      body: Form(
-        key: _formKey,
-        autovalidateMode: authViewModel.autoValidateModeAddTeamMember,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 20, top: 30),
-          padding: const EdgeInsets.only(left: 24, right: 24, bottom: 30),
+      body: Container(
+        margin: const EdgeInsets.only(bottom: 20, top: 30),
+        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 30),
+        child: SafeArea(
           child: Stack(
             children: [
-              ListView(
-                children: [
-                  Text(
-                    "First Name",
-                    style: GoogleFonts.nunitoSans(
-                      color: const Color(0xff212121),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  AppTextField(
-                    controller: _firsNameController,
-                    hintText: "First Name",
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter first name';
-                      }
-                      return null;
-                    },
-                    textInputType: TextInputType.text,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Last Name",
-                    style: GoogleFonts.nunitoSans(
-                      color: const Color(0xff212121),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  AppTextField(
-                    controller: _lastNameController,
-                    hintText: "Last Name",
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter last name';
-                      }
-                      return null;
-                    },
-                    textInputType: TextInputType.text,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Email",
-                    style: GoogleFonts.nunitoSans(
-                      color: const Color(0xff212121),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  AppTextField(
-                    controller: _emailController,
-                    hintText: 'Email',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter email';
-                      } else if (!value.isValidEmail()) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    },
-                    textInputType: TextInputType.text,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Phone Number",
-                    style: GoogleFonts.nunitoSans(
-                      color: const Color(0xff212121),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  AppTextField(
-                    controller: _phoneNumberController,
-                    hintText: "Phone Number",
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter phone number';
-                      }
-                      return null;
-                    },
-                    textInputType: TextInputType.phone,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Role",
-                    style: GoogleFonts.nunitoSans(
-                      color: const Color(0xff212121),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(
-                          color: const Color(0xFFEAEAEA),
-                          style: BorderStyle.solid,
-                          width: 0.80),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Theme(
-                      // <- Here
-                      data: Theme.of(context).copyWith(
-                        // <- Here
-                        splashColor: Colors.transparent, // <- Here
-                        highlightColor: Colors.transparent, // <- Here
-                        hoverColor: Colors.transparent, // <- Here
+              Form(
+                key: _formKey,
+                autovalidateMode: authViewModel.autoValidateModeAddTeamMember,
+                child: ListView(
+                  children: [
+                    Text(
+                      "First Name",
+                      style: GoogleFonts.nunitoSans(
+                        color: const Color(0xff212121),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                       ),
-                      child: authViewModel.roleList.isEmpty
-                          ? const SizedBox()
-                          : DropdownButtonHideUnderline(
-                              child: DropdownButton<UserRoleModel>(
-                                value: authViewModel.selectedUserRole,
-                                icon: SvgPicture.asset(
-                                    'assets/svg/arrow-down-icon.svg'),
-                                elevation: 16,
-                                onChanged: (UserRoleModel? value) {
-                                  // This is called when the user selects an item.
-                                  authViewModel.selectedUserRole = value!;
-                                },
-                                items: authViewModel.roleList
-                                    .map<DropdownMenuItem<UserRoleModel>>(
-                                        (UserRoleModel value) {
-                                  return DropdownMenuItem<UserRoleModel>(
-                                    value: value,
-                                    child: Text(
-                                      value.title.toString(),
-                                      style: GoogleFonts.nunitoSans(
-                                        color: value.title == '-Select-'
-                                            ? const Color(0xff898989)
-                                            : const Color(0xff212121),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    AppTextField(
+                      controller: _firsNameController,
+                      hintText: "First Name",
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter first name';
+                        }
+                        return null;
+                      },
+                      textInputType: TextInputType.text,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Last Name",
+                      style: GoogleFonts.nunitoSans(
+                        color: const Color(0xff212121),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    AppTextField(
+                      controller: _lastNameController,
+                      hintText: "Last Name",
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter last name';
+                        }
+                        return null;
+                      },
+                      textInputType: TextInputType.text,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Email",
+                      style: GoogleFonts.nunitoSans(
+                        color: const Color(0xff212121),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    AppTextField(
+                      controller: _emailController,
+                      hintText: 'Email',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter email';
+                        } else if (!value.isValidEmail()) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                      textInputType: TextInputType.text,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Phone Number",
+                      style: GoogleFonts.nunitoSans(
+                        color: const Color(0xff212121),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    AppTextField(
+                      controller: _phoneNumberController,
+                      hintText: "Phone Number",
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter phone number';
+                        }
+                        return null;
+                      },
+                      textInputType: TextInputType.phone,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Role",
+                      style: GoogleFonts.nunitoSans(
+                        color: const Color(0xff212121),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        border: Border.all(
+                            color: const Color(0xFFEAEAEA),
+                            style: BorderStyle.solid,
+                            width: 0.80),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Theme(
+                        // <- Here
+                        data: Theme.of(context).copyWith(
+                          // <- Here
+                          splashColor: Colors.transparent, // <- Here
+                          highlightColor: Colors.transparent, // <- Here
+                          hoverColor: Colors.transparent, // <- Here
+                        ),
+                        child: authViewModel.roleList.isEmpty
+                            ? const SizedBox()
+                            : DropdownButtonHideUnderline(
+                                child: DropdownButton<UserRoleModel>(
+                                  value: authViewModel.selectedUserRole,
+                                  icon: SvgPicture.asset(
+                                      'assets/svg/arrow-down-icon.svg'),
+                                  elevation: 16,
+                                  onChanged: (UserRoleModel? value) {
+                                    // This is called when the user selects an item.
+                                    authViewModel.selectedUserRole = value!;
+                                  },
+                                  items: authViewModel.roleList
+                                      .map<DropdownMenuItem<UserRoleModel>>(
+                                          (UserRoleModel value) {
+                                    return DropdownMenuItem<UserRoleModel>(
+                                      value: value,
+                                      child: Text(
+                                        value.title.toString(),
+                                        style: GoogleFonts.nunitoSans(
+                                          color: value.title == '-Select-'
+                                              ? const Color(0xff898989)
+                                              : const Color(0xff212121),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Assign to",
-                    style: GoogleFonts.nunitoSans(
-                      color: const Color(0xff212121),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(
-                          color: const Color(0xFFEAEAEA),
-                          style: BorderStyle.solid,
-                          width: 0.80),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Theme(
-                      // <- Here
-                      data: Theme.of(context).copyWith(
-                        // <- Here
-                        splashColor: Colors.transparent, // <- Here
-                        highlightColor: Colors.transparent, // <- Here
-                        hoverColor: Colors.transparent, // <- Here
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<Machines>(
-                          value: authViewModel.selectedAssignedToMachine,
-                          icon: SvgPicture.asset(
-                              'assets/svg/arrow-down-icon.svg'),
-                          elevation: 16,
-                          onChanged: (Machines? value) {
-                            // This is called when the user selects an item.
-                            authViewModel.selectedAssignedToMachine = value!;
-                          },
-                          items: authViewModel.assignToList
-                              .map<DropdownMenuItem<Machines>>(
-                                  (Machines value) {
-                            return DropdownMenuItem<Machines>(
-                              value: value,
-                              child: Text(
-                                value.machineName.toString(),
-                                style: GoogleFonts.nunitoSans(
-                                  color: value.machineName == '-Select-'
-                                      ? const Color(0xff898989)
-                                      : const Color(0xff212121),
+                                    );
+                                  }).toList(),
                                 ),
                               ),
-                            );
-                          }).toList(),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Assign to",
+                      style: GoogleFonts.nunitoSans(
+                        color: const Color(0xff212121),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        border: Border.all(
+                            color: const Color(0xFFEAEAEA),
+                            style: BorderStyle.solid,
+                            width: 0.80),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Theme(
+                        // <- Here
+                        data: Theme.of(context).copyWith(
+                          // <- Here
+                          splashColor: Colors.transparent, // <- Here
+                          highlightColor: Colors.transparent, // <- Here
+                          hoverColor: Colors.transparent, // <- Here
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<Machines>(
+                            value: authViewModel.selectedAssignedToMachine,
+                            icon: SvgPicture.asset(
+                                'assets/svg/arrow-down-icon.svg'),
+                            elevation: 16,
+                            onChanged: (Machines? value) {
+                              // This is called when the user selects an item.
+                              authViewModel.selectedAssignedToMachine = value!;
+                            },
+                            items: authViewModel.assignToList
+                                .map<DropdownMenuItem<Machines>>(
+                                    (Machines value) {
+                              return DropdownMenuItem<Machines>(
+                                value: value,
+                                child: Text(
+                                  value.machineName.toString(),
+                                  style: GoogleFonts.nunitoSans(
+                                    color: value.machineName == '-Select-'
+                                        ? const Color(0xff898989)
+                                        : const Color(0xff212121),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  MediaQuery.of(context).orientation == Orientation.landscape
-                      ? Container(
-                          margin: const EdgeInsets.symmetric(vertical: 40),
-                          child: AppButton(
-                            onTap: () {
-                              _addMember(authViewModel, widget.teamMember);
-                            },
-                            title: "Save",
-                          ),
-                        )
-                      : const SizedBox(),
-                ],
-              ),
-              MediaQuery.of(context).orientation == Orientation.portrait
-                  ? Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    // MediaQuery.of(context).orientation == Orientation.landscape
+                    //     ?
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 40),
                       child: AppButton(
                         onTap: () {
                           _addMember(authViewModel, widget.teamMember);
@@ -360,7 +347,23 @@ class _EditTeamMemberViewState extends State<EditTeamMemberView> {
                         title: "Save",
                       ),
                     )
-                  : const SizedBox()
+                    // : const SizedBox(),
+                  ],
+                ),
+              ),
+              // MediaQuery.of(context).orientation == Orientation.portrait
+              //     ? Positioned(
+              //         bottom: 0,
+              //         left: 0,
+              //         right: 0,
+              //         child: AppButton(
+              //           onTap: () {
+              //             _addMember(authViewModel, widget.teamMember);
+              //           },
+              //           title: "Save",
+              //         ),
+              //       )
+              //     : const SizedBox()
             ],
           ),
         ),

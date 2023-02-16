@@ -109,11 +109,13 @@ class _OtpViewState extends State<OtpView> {
                       enableActiveFill: true,
                       // errorAnimationController: errorController,
                       // controller: textEditingController,
-                      onCompleted: (v) {
+                      onCompleted: (value) {
                         print("Completed");
+                        // authViewModel.otpCodeInput = value;
                       },
                       onChanged: (value) {
                         print(value);
+                        authViewModel.otpCodeInput = value;
                       },
                       beforeTextPaste: (text) {
                         print("Allowing to paste $text");

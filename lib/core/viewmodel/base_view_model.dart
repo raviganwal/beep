@@ -7,6 +7,15 @@ class BaseViewModel extends ChangeNotifier {
 
   ViewStatus get status => _status;
 
+  int _selectedTabIndex = 0;
+
+  int get selectedTabIndex => _selectedTabIndex;
+
+  set selectedTabIndex(int value) {
+    _selectedTabIndex = value;
+    notifyListeners();
+  }
+
   void setStatus(ViewStatus value) {
     _status = value;
     notifyListeners();
@@ -21,7 +30,7 @@ class BaseViewModel extends ChangeNotifier {
         }
       case "2":
         {
-          return "Technician";
+          return "Manager";
         }
       case "3":
         {

@@ -35,6 +35,8 @@ class MachineViewModel extends BaseViewModel {
 
   List<Machine> machineList = [];
   List<Machine> attentionsList = [];
+  List<Machine> filteredMachineList = [];
+  List<Machine> filteredAttentionsList = [];
   List<TeamMembers> machineTeamList = [];
   List<Issue> issuesList = [];
   List<Review> reviewsList = [];
@@ -43,6 +45,8 @@ class MachineViewModel extends BaseViewModel {
   List<ReportOption> reportOptionsList = [];
   bool _isMachineAdded = false;
   bool _flashToggle = false;
+
+  bool _searchOpen = false;
 
   //Machine
   bool _enableVoice = false;
@@ -61,6 +65,17 @@ class MachineViewModel extends BaseViewModel {
 
   set pickedFile(XFile? value) {
     _pickedFile = value;
+    notifyListeners();
+  }
+
+  bool get searchOpen => _searchOpen;
+
+  set searchOpen(bool value) {
+    _searchOpen = value;
+    if (!searchOpen) {
+      filteredAttentionsList = attentionsList;
+      filteredMachineList = machineList;
+    }
     notifyListeners();
   }
 
@@ -178,10 +193,6 @@ class MachineViewModel extends BaseViewModel {
         machine.maintenanceMode == "0" &&
         machine.foamTank == "0" &&
         machine.waterTank == "0" &&
-        machine.waterHeater == "0" &&
-        machine.foamHeater == "0" &&
-        machine.light == "0" &&
-        machine.voice == "0" &&
         (machine.issues == "0")) {
       return MachineStatus.operatesNormally;
     } else if (machine.err == "1") {
@@ -190,13 +201,23 @@ class MachineViewModel extends BaseViewModel {
         (machine.foamTank == "1" ||
             machine.maintenanceMode == "1" ||
             machine.waterTank == "1" ||
-            machine.waterHeater == "1" ||
-            machine.foamHeater == "1" ||
-            machine.light == "1" ||
-            machine.voice == "1" ||
             machine.issues != "0")) {
       return MachineStatus.needAttention;
     }
+  }
+
+  searchMachine({String? query = ""}) {
+    filteredMachineList = machineList
+        .where((item) => item.machineName!
+            .toLowerCase()
+            .contains(query.toString().toLowerCase()))
+        .toList();
+    filteredAttentionsList = attentionsList
+        .where((item) => item.machineName!
+            .toLowerCase()
+            .contains(query.toString().toLowerCase()))
+        .toList();
+    notifyListeners();
   }
 
   getAllMachine({AuthViewModel? authViewModel}) async {
@@ -264,6 +285,7 @@ class MachineViewModel extends BaseViewModel {
 
   addMachine({required String qrCode}) async {
     setStatus(ViewStatus.loading);
+    isMachineAdded = false;
     final params = {
       "qr_code": qrCode,
       "token": await _sharedPrefService.getStringKey(
@@ -274,7 +296,7 @@ class MachineViewModel extends BaseViewModel {
     setStatus(ViewStatus.ready);
     Fluttertoast.showToast(msg: response['msg']);
     if (response["code"] == 200) {
-      isMachineAdded = !isMachineAdded;
+      isMachineAdded = true;
     }
     notifyListeners();
     getAllMachine();
@@ -361,11 +383,11 @@ class MachineViewModel extends BaseViewModel {
       "machine_name": machineName,
       "address": address,
       "city_id": cityId,
-      "state": placemark?.administrativeArea,
-      "country": placemark?.country,
-      "postal_code": placemark?.postalCode,
-      "machine_lat": currentPosition?.latitude,
-      "machine_long": currentPosition?.longitude,
+      "state": placemark?.administrativeArea ?? selectedMahcine.state,
+      "country": placemark?.country ?? selectedMahcine.country,
+      "postal_code": placemark?.postalCode ?? selectedMahcine.postalCode,
+      "machine_lat": currentPosition?.latitude ?? selectedMahcine.machineLat,
+      "machine_long": currentPosition?.longitude ?? selectedMahcine.machineLong,
       "public_access": enablePublicAccess ? "0" : "1",
       "maintenance_mode": enableMaintenance ? "1" : "0",
     };

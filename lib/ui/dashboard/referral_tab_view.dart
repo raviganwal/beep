@@ -1,6 +1,9 @@
+import 'package:beep/core/viewmodel/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../widget/button/app_button.dart';
 
@@ -13,7 +16,17 @@ class ReferralTabView extends StatefulWidget {
 
 class _ReferralTabViewState extends State<ReferralTabView> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final authViewModel = context.read<AuthViewModel>();
+      authViewModel.getReferralCode();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -265,7 +278,10 @@ class _ReferralTabViewState extends State<ReferralTabView> {
               height: 30,
             ),
             AppButton(
-              onTap: () {},
+              onTap: () {
+                Share.share(
+                    'Beep Operator: Use my referral code ${authViewModel.profileModel?.accountInfo?.referralCode ?? authViewModel.referralCode}');
+              },
               title: "Invite Operator",
             ),
             const SizedBox(

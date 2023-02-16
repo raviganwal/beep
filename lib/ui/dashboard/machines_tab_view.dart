@@ -79,12 +79,45 @@ class _MachinesTabViewState extends State<MachinesTabView> {
               ],
             ),
             actions: [
-              IconButton(
-                onPressed: () {},
-                icon: SvgPicture.asset(
-                  'assets/svg/search_icon.svg',
+              machineViewModel.searchOpen
+                  ? Expanded(
+                      // width: MediaQuery.of(context).size.width,
+                      // margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              machineViewModel.searchOpen =
+                                  !machineViewModel.searchOpen;
+                            },
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Flexible(
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Search here'),
+                              onChanged: (value) {
+                                machineViewModel.searchMachine(query: value);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox(),
+              if (!machineViewModel.searchOpen)
+                IconButton(
+                  onPressed: () {
+                    machineViewModel.searchOpen = !machineViewModel.searchOpen;
+                  },
+                  icon: SvgPicture.asset(
+                    'assets/svg/search_icon.svg',
+                  ),
                 ),
-              )
             ],
           ),
         ),
@@ -148,10 +181,11 @@ class _MachinesTabViewState extends State<MachinesTabView> {
                     padding: const EdgeInsets.only(
                         left: 24, bottom: 20, top: 10, right: 24),
                     shrinkWrap: true,
-                    itemCount: machineViewModel.machineList.length,
+                    itemCount: machineViewModel.filteredMachineList.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (context, index) {
-                      Machine machine = machineViewModel.machineList[index];
+                      Machine machine =
+                          machineViewModel.filteredMachineList[index];
                       return MachineListItemWidget(
                           machine: machine,
                           onTap: () async {
@@ -200,7 +234,7 @@ class _MachinesTabViewState extends State<MachinesTabView> {
                     ? Container(
                         height: 373,
                       )
-                    : machineViewModel.attentionsList.isEmpty
+                    : machineViewModel.filteredAttentionsList.isEmpty
                         ? const AllGoodWidget()
                         : SizedBox(
                             height: 344,
@@ -208,7 +242,8 @@ class _MachinesTabViewState extends State<MachinesTabView> {
                               padding: const EdgeInsets.only(
                                   left: 24, bottom: 20, top: 10, right: 24),
                               shrinkWrap: true,
-                              itemCount: machineViewModel.attentionsList.length,
+                              itemCount: machineViewModel
+                                  .filteredAttentionsList.length,
                               scrollDirection: Axis.horizontal,
                               itemBuilder: (context, index) {
                                 Machine machine =
